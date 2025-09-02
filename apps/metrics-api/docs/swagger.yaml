@@ -1,0 +1,54 @@
+basePath: /
+host: localhost:8081
+info:
+  contact: {}
+  description: Provides health checks and Prometheus metrics.
+  title: Metrics API
+  version: "0.1"
+paths:
+  /health:
+    get:
+      description: Returns OK if service is alive
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Liveness probe
+      tags:
+      - health
+  /metrics:
+    get:
+      description: Exposes metrics in Prometheus text format
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Prometheus metrics text format
+          schema:
+            type: string
+      summary: Prometheus metrics
+      tags:
+      - metrics
+  /ready:
+    get:
+      description: Checks dependencies like Postgres/Redis
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Readiness probe
+      tags:
+      - health
+swagger: "2.0"
