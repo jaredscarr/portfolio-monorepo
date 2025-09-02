@@ -1,0 +1,18 @@
+{
+  "name": "portfolio-monorepo",
+  "version": "1.0.0",
+  "description": "Houses projects I want to showcase.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "turbo": "^2.5.6"
+  }
+}

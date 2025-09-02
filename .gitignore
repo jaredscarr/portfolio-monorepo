@@ -1,0 +1,71 @@
+# ============================
+# Go
+# ============================
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build output
+*.test
+*.out
+
+# Go coverage
+*.coverprofile
+*.cov
+coverage.*
+
+# Go workspace
+go.work.sum
+
+# ============================
+# Node / JavaScript
+# ============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vscode-test/
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Framework build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# ============================
+# Docker
+# ============================
+volumes/
+dbdata/
+*.pid
+*.seed
+
+# ============================
+# Env / Secrets
+# ============================
+.env
+.env.*
+!*.env.example
+
+# ============================
+# IDE / Editor
+# ============================
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ============================
+# Misc
+# ============================
+*.log
+coverage/
