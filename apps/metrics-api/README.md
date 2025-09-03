@@ -3,6 +3,8 @@
 The **Metrics API** provides basic observability endpoints for services in this portfolio.  
 It standardizes health checks, readiness checks, and Prometheus metrics exposure.
 
+The metrics-api provides a minimal baseline (health, readiness, HTTP counters, latency histograms, Go runtime metrics). As additional services are added, domain-specific metrics will be registered where they provide value.
+
 ## Endpoints
 
 - `GET /health` → Liveness probe  

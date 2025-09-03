@@ -17,7 +17,8 @@ import (
 // @BasePath /
 func main() {
     r := gin.Default()
-	
+	r.Use(handlers.MetricsMiddleware())
+
     // Health
     r.GET("/health", handlers.Health)
     r.GET("/ready", handlers.Ready)
