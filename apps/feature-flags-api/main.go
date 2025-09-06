@@ -15,13 +15,14 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	docs "github.com/jared-scarr/portfolio-monorepo/apps/feature-flags-api/docs"
-	"github.com/jared-scarr/portfolio-monorepo/apps/feature-flags-api/handlers"
 	"github.com/jared-scarr/portfolio-monorepo/apps/feature-flags-api/flags"
+	"github.com/jared-scarr/portfolio-monorepo/apps/feature-flags-api/handlers"
+	observability "github.com/jared-scarr/portfolio-monorepo/packages/observability/handlers"
 )
 
 func main() {
 	if err := flags.LoadFlagsFromDisk("local"); err != nil {
-    	log.Fatal(err)
+		log.Fatal(err)
 	}
 	if err := flags.LoadFlagsFromDisk("prod"); err != nil {
 		log.Fatal(err)
@@ -30,14 +31,21 @@ func main() {
 	flags.LoadFlagsFromDisk("local")
 	flags.LoadFlagsFromDisk("prod")
 
-
 	docs.SwaggerInfo.Title = "Feature Flags API"
 	docs.SwaggerInfo.Version = "1.0.0"
 	docs.SwaggerInfo.BasePath = "/"
 
 	r := gin.Default()
 
-	r.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"status": "ok"}) })
+	// Add observability middleware
+	r.Use(observability.MetricsMiddleware())
+
+	// Observability endpoints
+	r.GET("/health", observability.Health)
+	r.GET("/ready", observability.Ready)
+	r.GET("/metrics", observability.Metrics)
+
+	// Feature flags endpoints
 	r.GET("/flags", handlers.GetFlags)
 	r.GET("/flags/:key", handlers.GetFlagByKey)
 	r.POST("/admin/reload", handlers.ReloadFlags)
