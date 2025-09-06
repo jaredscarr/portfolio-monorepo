@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	docs "github.com/jared-scarr/portfolio-monorepo/packages/observability/docs"
-	"github.com/jared-scarr/portfolio-monorepo/packages/observability/internal/handlers"
+	"github.com/jared-scarr/portfolio-monorepo/packages/observability/handlers"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
