@@ -19,19 +19,6 @@ paths:
       summary: Liveness probe
       tags:
       - health
-  /metrics:
-    get:
-      description: Exposes metrics in Prometheus text format
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: Prometheus metrics text format
-          schema:
-            type: string
-      summary: Prometheus metrics
-      tags:
-      - metrics
   /ready:
     get:
       description: Checks dependencies like Postgres/Redis

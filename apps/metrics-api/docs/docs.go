@@ -35,26 +35,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/metrics": {
-            "get": {
-                "description": "Exposes metrics in Prometheus text format",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "metrics"
-                ],
-                "summary": "Prometheus metrics",
-                "responses": {
-                    "200": {
-                        "description": "Prometheus metrics text format",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/ready": {
             "get": {
                 "description": "Checks dependencies like Postgres/Redis",

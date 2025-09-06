@@ -1,13 +1,13 @@
 package main
 
 import (
-    "log"
+	"log"
 
-    "github.com/gin-gonic/gin"
-    _ "github.com/jared-scarr/portfolio-monorepo/apps/metrics-api/docs" // swagger docs
-    "github.com/jared-scarr/portfolio-monorepo/apps/metrics-api/internal/handlers"
-    ginSwagger "github.com/swaggo/gin-swagger"
-    swaggerFiles "github.com/swaggo/files"
+	"github.com/gin-gonic/gin"
+	docs "github.com/jared-scarr/portfolio-monorepo/apps/metrics-api/docs"
+	"github.com/jared-scarr/portfolio-monorepo/apps/metrics-api/internal/handlers"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title Metrics API
@@ -16,21 +16,26 @@ import (
 // @host localhost:8081
 // @BasePath /
 func main() {
-    r := gin.Default()
+	docs.SwaggerInfo.Title = "Metrics API"
+	docs.SwaggerInfo.Description = "Provides health checks and Prometheus metrics."
+	docs.SwaggerInfo.Version = "0.1"
+	docs.SwaggerInfo.Host = "localhost:8081"
+	docs.SwaggerInfo.BasePath = "/"
+	r := gin.Default()
 	r.Use(handlers.MetricsMiddleware())
 
-    // Health
-    r.GET("/health", handlers.Health)
-    r.GET("/ready", handlers.Ready)
+	// Health
+	r.GET("/health", handlers.Health)
+	r.GET("/ready", handlers.Ready)
 
-    // Metrics
-    r.GET("/metrics", handlers.Metrics)
+	// Metrics
+	r.GET("/metrics", handlers.Metrics)
 
-    // Swagger docs
-    r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Swagger docs
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-    log.Println("Metrics API running at http://localhost:8081")
-    log.Println("Swagger docs available at http://localhost:8081/docs/index.html")
+	log.Println("Metrics API running at http://localhost:8081")
+	log.Println("Swagger docs available at http://localhost:8081/docs/index.html")
 
-    r.Run(":8081")
+	r.Run(":8081")
 }

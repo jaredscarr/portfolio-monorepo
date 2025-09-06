@@ -16,14 +16,50 @@ The metrics-api provides a minimal baseline (health, readiness, HTTP counters, l
 ## Running Locally
 
 ```bash
-make run
+go run .
+```
 
-## Updating Swagger Docs
+## Testing
+
+This project includes comprehensive unit tests for all handlers and middleware.
+
+### Running Tests
 
 ```bash
-make swag
+# Run all tests
+go test ./...
 
-## Dependency Management
+# Run tests with verbose output
+go test ./... -v
+
+# Run tests for specific package
+go test ./internal/handlers -v
+
+# Run tests with coverage
+go test ./... -cover
+
+# Run tests with coverage and generate HTML report
+go test ./... -cover -coverprofile=coverage.out
+go tool cover -html=coverage.out -o coverage.html
+```
+
+### Running Benchmarks
+
 ```bash
-make tidy
+# Run all benchmarks
+go test -bench=. -benchmem
 
+# Run benchmarks with memory allocation info
+go test -bench=. -benchmem
+
+# Run specific benchmark
+go test -bench=BenchmarkHealth -benchmem
+
+# Run benchmarks for longer (more accurate results)
+go test -bench=. -benchtime=10s
+```
+
+## Update Swagger docs
+
+```bash
+swag init -g main.go -o docs/ -ot json
