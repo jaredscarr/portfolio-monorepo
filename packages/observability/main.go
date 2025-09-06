@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	docs "github.com/jared-scarr/portfolio-monorepo/apps/metrics-api/docs"
-	"github.com/jared-scarr/portfolio-monorepo/apps/metrics-api/internal/handlers"
+	docs "github.com/jared-scarr/portfolio-monorepo/packages/observability/docs"
+	"github.com/jared-scarr/portfolio-monorepo/packages/observability/internal/handlers"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
