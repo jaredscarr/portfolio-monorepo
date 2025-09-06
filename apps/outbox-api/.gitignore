@@ -1,0 +1,38 @@
+# Sensitive configuration files
+config.json
+config.local.json
+config.prod.json
+*.env
+.env*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+outbox-api
+outbox-api.exe
+*.exe
+
+# Test coverage
+coverage.out
+coverage.html
