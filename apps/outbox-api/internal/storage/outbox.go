@@ -331,3 +331,20 @@ func (s *OutboxStore) GetStats() (*models.StatsResponse, error) {
 
 	return &stats, nil
 }
+
+// UpdateEventPublishedAt updates the published_at timestamp for an event
+func (s *OutboxStore) UpdateEventPublishedAt(id string, publishedAt *time.Time) error {
+	query := `
+		UPDATE outbox_events 
+		SET published_at = $1, updated_at = $2
+		WHERE id = $3
+	`
+
+	now := time.Now()
+	_, err := s.db.conn.Exec(query, publishedAt, now, id)
+	if err != nil {
+		return fmt.Errorf("failed to update published_at for event %s: %w", id, err)
+	}
+
+	return nil
+}

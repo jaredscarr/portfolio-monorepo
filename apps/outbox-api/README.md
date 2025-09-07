@@ -84,12 +84,26 @@ The service will start on port 8080 by default.
 
 ## Configuration
 
-**⚠️ SECURITY WARNING**: Never commit `config.json` with real passwords to version control! Use environment variables or secure secret management in production.
+The service uses environment variables for configuration. Create a `.env` file in the project root:
 
-The service can be configured via:
+```bash
+# Database Configuration
+DB_USER=postgres
+DB_PASSWORD=password
+DB_HOST=localhost
+DB_NAME=outbox
 
-- **Configuration file**: `config.json` (see `config.json.example`)
-- **Environment variables**: Override any config file setting (recommended for sensitive data)
+# Server Configuration
+PORT=8080
+
+# Webhook Configuration
+WEBHOOK_URL=http://localhost:3000/webhook
+
+# Optional overrides
+BATCH_SIZE=10
+```
+
+
 
 ### Environment Variables
 
@@ -143,6 +157,7 @@ This prevents sensitive data from being stored in configuration files that might
 
 ### Creating an Event
 
+**Linux/macOS:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/events \
   -H "Content-Type: application/json" \
@@ -161,8 +176,14 @@ curl -X POST http://localhost:8080/api/v1/events \
   }'
 ```
 
+**Windows PowerShell:**
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events" -Method POST -ContentType "application/json" -Body '{"type": "user.created", "source": "user-service", "data": {"user_id": "123", "email": "user@example.com", "name": "John Doe"}, "metadata": {"version": "1.0", "correlation_id": "abc-123"}}'
+```
+
 ### Listing Events
 
+**Linux/macOS:**
 ```bash
 # List all events
 curl http://localhost:8080/api/v1/events
@@ -174,10 +195,28 @@ curl http://localhost:8080/api/v1/events?status=pending
 curl http://localhost:8080/api/v1/events?page=1&limit=10
 ```
 
+**Windows PowerShell:**
+```powershell
+# List all events
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events"
+
+# List pending events only
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events?status=pending"
+
+# Paginated results
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events?page=1&limit=10"
+```
+
 ### Getting Statistics
 
+**Linux/macOS:**
 ```bash
 curl http://localhost:8080/admin/stats
+```
+
+**Windows PowerShell:**
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/admin/stats"
 ```
 
 ## Development

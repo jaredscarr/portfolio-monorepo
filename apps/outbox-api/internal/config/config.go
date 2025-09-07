@@ -1,10 +1,11 @@
 package config
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Config holds all configuration for the outbox-api service
@@ -49,7 +50,7 @@ type CircuitConfig struct {
 	Timeout     string `json:"timeout"`
 }
 
-// Load loads configuration from file and environment variables
+// Load loads configuration from .env file and environment variables
 func Load() (*Config, error) {
 	cfg := &Config{
 		Server: ServerConfig{
@@ -80,10 +81,10 @@ func Load() (*Config, error) {
 		},
 	}
 
-	// Load from config file if it exists
-	if err := loadFromFile(cfg, "config.json"); err != nil {
-		// Config file is optional, so we continue with defaults
-		fmt.Printf("Warning: Could not load config file: %v\n", err)
+	// Load from .env file if it exists
+	if err := loadFromEnvFile(".env"); err != nil {
+		// .env file is optional, so we continue with defaults
+		fmt.Printf("Warning: Could not load .env file: %v\n", err)
 	}
 
 	// Override with environment variables
@@ -92,14 +93,33 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-// loadFromFile loads configuration from a JSON file
-func loadFromFile(cfg *Config, filename string) error {
-	data, err := os.ReadFile(filename)
+// loadFromEnvFile loads environment variables from a .env file
+func loadFromEnvFile(filename string) error {
+	file, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	return json.Unmarshal(data, cfg)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		// Skip empty lines and comments
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		// Parse KEY=VALUE
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			os.Setenv(key, value)
+		}
+	}
+
+	return scanner.Err()
 }
 
 // loadFromEnv loads configuration from environment variables

@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/config"
@@ -165,12 +169,70 @@ func (h *Handler) PublishEvents(c *gin.Context) {
 		return
 	}
 
-	// For now, just return a placeholder response
-	// The actual publishing logic will be implemented in the publisher service
-	c.JSON(http.StatusOK, gin.H{
-		"message": "publish endpoint - implementation pending",
-		"request": req,
-	})
+	// Set default batch size if not provided
+	batchSize := req.BatchSize
+	if batchSize <= 0 {
+		batchSize = h.cfg.Publish.BatchSize
+	}
+
+	var events []models.Event
+	var err error
+
+	// Get events to publish
+	if len(req.EventIDs) > 0 {
+		// Get specific events by ID
+		events, err = h.getEventsByIDs(req.EventIDs)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		// Get pending events
+		events, err = h.store.GetPendingEvents(batchSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if len(events) == 0 {
+		c.JSON(http.StatusOK, models.PublishResponse{
+			Published: 0,
+			Failed:    0,
+		})
+		return
+	}
+
+	// Publish events
+	published := 0
+	failed := 0
+	var errors []string
+
+	for _, event := range events {
+		err := h.publishEvent(&event)
+		if err != nil {
+			failed++
+			errors = append(errors, fmt.Sprintf("Event %s: %v", event.ID, err))
+
+			// Update event status to failed
+			h.store.UpdateEventStatus(event.ID, models.StatusFailed, err.Error(), event.RetryCount+1)
+		} else {
+			published++
+
+			// Update event status to published
+			now := time.Now()
+			h.store.UpdateEventStatus(event.ID, models.StatusPublished, "", event.RetryCount)
+			h.store.UpdateEventPublishedAt(event.ID, &now)
+		}
+	}
+
+	response := models.PublishResponse{
+		Published: published,
+		Failed:    failed,
+		Errors:    errors,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // GetStats returns service statistics
@@ -182,4 +244,71 @@ func (h *Handler) GetStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, stats)
+}
+
+// getEventsByIDs retrieves specific events by their IDs
+func (h *Handler) getEventsByIDs(eventIDs []string) ([]models.Event, error) {
+	var events []models.Event
+
+	for _, id := range eventIDs {
+		event, err := h.store.GetEvent(id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get event %s: %w", id, err)
+		}
+
+		// Only include events that are pending or retrying
+		if event.Status == models.StatusPending || event.Status == models.StatusRetrying {
+			events = append(events, *event)
+		}
+	}
+
+	return events, nil
+}
+
+// publishEvent sends an event to the webhook URL
+func (h *Handler) publishEvent(event *models.Event) error {
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 30 * time.Second, // Default timeout, could be made configurable
+	}
+
+	// Prepare the webhook payload
+	payload := map[string]interface{}{
+		"id":         event.ID,
+		"type":       event.Type,
+		"source":     event.Source,
+		"data":       event.Data,
+		"metadata":   event.Metadata,
+		"created_at": event.CreatedAt,
+	}
+
+	// Marshal payload to JSON
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal event data: %w", err)
+	}
+
+	// Create HTTP request
+	req, err := http.NewRequest("POST", h.cfg.Publish.WebhookURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "outbox-api/1.0")
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send webhook request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check response status
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("webhook returned status %d", resp.StatusCode)
+	}
+
+	return nil
 }
