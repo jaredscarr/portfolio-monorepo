@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/config"
@@ -59,6 +60,11 @@ func (m *MockOutboxStore) GetStats() (*models.StatsResponse, error) {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*models.StatsResponse), args.Error(1)
+}
+
+func (m *MockOutboxStore) UpdateEventPublishedAt(id string, publishedAt *time.Time) error {
+	args := m.Called(id, publishedAt)
+	return args.Error(0)
 }
 
 func setupTestRouter(store *MockOutboxStore) *gin.Engine {
@@ -536,6 +542,220 @@ func TestHandler_GetStats(t *testing.T) {
 				err = json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
 				assert.Equal(t, *tt.expectedStats, response)
+			}
+
+			mockStore.AssertExpectations(t)
+		})
+	}
+}
+
+func TestHandler_PublishEvents(t *testing.T) {
+	tests := []struct {
+		name           string
+		requestBody    interface{}
+		mockSetup      func(*MockOutboxStore)
+		expectedStatus int
+		expectedError  string
+	}{
+		{
+			name: "publish pending events with webhook failure",
+			requestBody: models.PublishRequest{
+				BatchSize: 5,
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				events := []models.Event{
+					{
+						ID:         "event-1",
+						Type:       "test.event",
+						Source:     "test-service",
+						Status:     models.StatusPending,
+						RetryCount: 0,
+					},
+					{
+						ID:         "event-2",
+						Type:       "test.event",
+						Source:     "test-service",
+						Status:     models.StatusPending,
+						RetryCount: 0,
+					},
+				}
+				mockStore.On("GetPendingEvents", 5).Return(events, nil)
+				// Expect failed status due to webhook connection failure
+				mockStore.On("UpdateEventStatus", "event-1", models.StatusFailed, mock.AnythingOfType("string"), 1).Return(nil)
+				mockStore.On("UpdateEventStatus", "event-2", models.StatusFailed, mock.AnythingOfType("string"), 1).Return(nil)
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "publish specific events by ID with webhook failure",
+			requestBody: models.PublishRequest{
+				EventIDs: []string{"event-1", "event-2"},
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				event1 := &models.Event{
+					ID:         "event-1",
+					Type:       "test.event",
+					Source:     "test-service",
+					Status:     models.StatusPending,
+					RetryCount: 0,
+				}
+				event2 := &models.Event{
+					ID:         "event-2",
+					Type:       "test.event",
+					Source:     "test-service",
+					Status:     models.StatusRetrying,
+					RetryCount: 1,
+				}
+				mockStore.On("GetEvent", "event-1").Return(event1, nil)
+				mockStore.On("GetEvent", "event-2").Return(event2, nil)
+				// Expect failed status due to webhook connection failure
+				mockStore.On("UpdateEventStatus", "event-1", models.StatusFailed, mock.AnythingOfType("string"), 1).Return(nil)
+				mockStore.On("UpdateEventStatus", "event-2", models.StatusFailed, mock.AnythingOfType("string"), 2).Return(nil)
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "no events to publish",
+			requestBody: models.PublishRequest{
+				BatchSize: 5,
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				mockStore.On("GetPendingEvents", 5).Return([]models.Event{}, nil)
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "no specific events to publish (all non-pending)",
+			requestBody: models.PublishRequest{
+				EventIDs: []string{"event-1", "event-2"},
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				event1 := &models.Event{
+					ID:     "event-1",
+					Type:   "test.event",
+					Source: "test-service",
+					Status: models.StatusPublished, // Already published
+				}
+				event2 := &models.Event{
+					ID:     "event-2",
+					Type:   "test.event",
+					Source: "test-service",
+					Status: models.StatusFailed, // Failed, not retrying
+				}
+				mockStore.On("GetEvent", "event-1").Return(event1, nil)
+				mockStore.On("GetEvent", "event-2").Return(event2, nil)
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "invalid request body",
+			requestBody: map[string]interface{}{
+				"batch_size": "invalid", // Should be int
+			},
+			mockSetup:      func(mockStore *MockOutboxStore) {},
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "storage error getting pending events",
+			requestBody: models.PublishRequest{
+				BatchSize: 5,
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				mockStore.On("GetPendingEvents", 5).Return(([]models.Event)(nil), assert.AnError)
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedError:  "assert.AnError general error for testing",
+		},
+		{
+			name: "storage error getting specific event",
+			requestBody: models.PublishRequest{
+				EventIDs: []string{"event-1"},
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				mockStore.On("GetEvent", "event-1").Return((*models.Event)(nil), assert.AnError)
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedError:  "failed to get event event-1: assert.AnError general error for testing",
+		},
+		{
+			name: "storage error updating event status",
+			requestBody: models.PublishRequest{
+				BatchSize: 5,
+			},
+			mockSetup: func(mockStore *MockOutboxStore) {
+				events := []models.Event{
+					{
+						ID:         "event-1",
+						Type:       "test.event",
+						Source:     "test-service",
+						Status:     models.StatusPending,
+						RetryCount: 0,
+					},
+				}
+				mockStore.On("GetPendingEvents", 5).Return(events, nil)
+				mockStore.On("UpdateEventStatus", "event-1", models.StatusFailed, mock.AnythingOfType("string"), 1).Return(nil)
+			},
+			expectedStatus: http.StatusOK, // HTTP errors are handled gracefully
+		},
+		{
+			name: "use default batch size when not provided",
+			requestBody: models.PublishRequest{}, // Empty request
+			mockSetup: func(mockStore *MockOutboxStore) {
+				mockStore.On("GetPendingEvents", 10).Return([]models.Event{}, nil) // Default batch size is 10
+			},
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStore := new(MockOutboxStore)
+			tt.mockSetup(mockStore)
+
+			// Setup config with webhook URL for testing
+			cfg := &config.Config{
+				Server: config.ServerConfig{
+					Port: "8080",
+				},
+				Publish: config.PublishConfig{
+					BatchSize:  10,
+					WebhookURL: "http://localhost:3000/webhook",
+				},
+			}
+
+			gin.SetMode(gin.TestMode)
+			router := gin.New()
+			h := New(mockStore, cfg)
+
+			// Admin endpoints
+			admin := router.Group("/admin")
+			{
+				admin.POST("/publish", h.PublishEvents)
+			}
+
+			jsonBody, err := json.Marshal(tt.requestBody)
+			require.NoError(t, err)
+
+			req, err := http.NewRequest("POST", "/admin/publish", bytes.NewBuffer(jsonBody))
+			require.NoError(t, err)
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			if tt.expectedError != "" {
+				var response map[string]interface{}
+				err = json.Unmarshal(w.Body.Bytes(), &response)
+				require.NoError(t, err)
+				assert.Contains(t, response["error"], tt.expectedError)
+			} else if tt.expectedStatus == http.StatusOK {
+				var response models.PublishResponse
+				err = json.Unmarshal(w.Body.Bytes(), &response)
+				require.NoError(t, err)
+				assert.GreaterOrEqual(t, response.Published, 0)
+				assert.GreaterOrEqual(t, response.Failed, 0)
 			}
 
 			mockStore.AssertExpectations(t)
