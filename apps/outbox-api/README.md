@@ -31,7 +31,7 @@ The service follows a "self-protecting service" deployment strategy focused on l
 
 - Go 1.21+
 - PostgreSQL 12+
-- Docker (optional)
+- Docker (recommended)
 
 ### Installation
 
@@ -81,6 +81,63 @@ The service follows a "self-protecting service" deployment strategy focused on l
    ```
 
 The service will start on port 8080 by default.
+
+### Docker Deployment (Recommended)
+
+The service is fully containerized and can be run using Docker Compose for easy setup:
+
+1. **Start the complete stack**:
+
+   ```bash
+   cd apps/outbox-api
+   docker-compose up --build -d
+   ```
+
+2. **Verify the services are running**:
+
+   ```bash
+   docker-compose ps
+   ```
+
+3. **Check the health endpoint**:
+
+   ```bash
+   curl http://localhost:8080/health
+   ```
+
+4. **View logs**:
+
+   ```bash
+   docker-compose logs -f outbox-api
+   ```
+
+5. **Stop the services**:
+
+   ```bash
+   docker-compose down
+   ```
+
+#### Docker Services
+
+The `docker-compose.yml` includes:
+
+- **outbox-api**: The main application service
+- **postgres**: PostgreSQL 15 database
+- **Automatic health checks**: Services wait for dependencies to be healthy
+- **Environment configuration**: Database connection automatically configured
+
+#### Building the Docker Image
+
+To build the Docker image manually:
+
+```bash
+# From the monorepo root
+docker build -f apps/outbox-api/Dockerfile -t outbox-api:latest .
+```
+
+#### Environment Configuration
+
+See [ENVIRONMENT.md](ENVIRONMENT.md) for detailed environment variable configuration.
 
 ## Configuration
 
@@ -158,6 +215,7 @@ This prevents sensitive data from being stored in configuration files that might
 ### Creating an Event
 
 **Linux/macOS:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/events \
   -H "Content-Type: application/json" \
@@ -177,6 +235,7 @@ curl -X POST http://localhost:8080/api/v1/events \
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events" -Method POST -ContentType "application/json" -Body '{"type": "user.created", "source": "user-service", "data": {"user_id": "123", "email": "user@example.com", "name": "John Doe"}, "metadata": {"version": "1.0", "correlation_id": "abc-123"}}'
 ```
@@ -184,6 +243,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events" -Method POST -Conte
 ### Listing Events
 
 **Linux/macOS:**
+
 ```bash
 # List all events
 curl http://localhost:8080/api/v1/events
@@ -196,6 +256,7 @@ curl http://localhost:8080/api/v1/events?page=1&limit=10
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 # List all events
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events"
@@ -210,11 +271,13 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events?page=1&limit=10"
 ### Getting Statistics
 
 **Linux/macOS:**
+
 ```bash
 curl http://localhost:8080/admin/stats
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/admin/stats"
 ```
@@ -247,16 +310,6 @@ The service is designed for deployment on AWS EC2 `t3.micro` instances with:
 - **Database**: PostgreSQL (can be RDS or self-managed)
 - **Monitoring**: CloudWatch Agent for metrics and logs
 - **Containerization**: Docker for consistent deployments
-
-### Docker Deployment
-
-```bash
-# Build the image
-docker build -t outbox-api .
-
-# Run with Docker Compose
-docker-compose up -d
-```
 
 ## Self-Protection Features
 
