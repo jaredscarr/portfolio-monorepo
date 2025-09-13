@@ -16,6 +16,25 @@ This repository houses examples of my work as a software engineer. The purpose i
 
 ---
 
+## Microservices Architecture: *Technology Evolution*
+
+While this is a **monorepo** each service is deployed as an **independent microservice**. The decision to use microservices rather than a monolithic runtime architecture was based on:
+
+**Why Microservices:**
+* **Technology Evolution:** Each service can adopt different languages, frameworks, or architectural patterns
+* **Portfolio Flexibility:** Enables showcasing proficiency across multiple technology stacks (Go, Python, Node.js, etc.)
+* **Future-Proofing:** No guarantee all services will remain Go-based as the portfolio evolves
+* **Negligible Cost Impact:** Resource difference (~40-100MB) is insignificant on a t3.micro instance
+
+**Trade-offs Accepted:**
+* **Operational Complexity:** More containers and service coordination
+* **Resource Overhead:** Multiple HTTP servers instead of shared memory
+* **Network Latency:** Inter-service communication over HTTP
+
+The flexibility to demonstrate different technologies and patterns outweighed the operational complexity for a portfolio project.
+
+---
+
 ## Architectural Thesis: *Longevity over Priority*
 
 These services are designed to run on a **single, low-cost EC2 instance**.
@@ -40,7 +59,7 @@ Key ideas:
 
 ## Deployment Philosophy
 
-* **Reverse proxy shaping:** Nginx/Caddy sits in front of APIs, shedding load before it hits Go processes.
+* **Reverse proxy shaping:** Nginx/Caddy sits in front of APIs, shedding load before it hits application processes.
 * **Application safeguards:** Concurrency limiter, timeouts, and circuit breakers.
 * **Adaptive load shedding:** Services dynamically adjust worker batch sizes, rate limits, or concurrency caps based on health metrics.
 * **Maintenance mode:** Services can be switched to low-power survival mode automatically or manually.
