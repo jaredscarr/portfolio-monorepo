@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Houses projects I want to showcase.",
   "main": "index.js",
+  "packageManager": "npm@10.2.4",
+  "workspaces": [
+    "ui/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

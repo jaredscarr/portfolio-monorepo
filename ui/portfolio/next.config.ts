@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   turbopack: {
-    root: __dirname,
+    resolveAlias: {
+      // Add any specific aliases if needed
+    },
+    resolveExtensions: [".js", ".jsx", ".ts", ".tsx"],
   },
 };
 
