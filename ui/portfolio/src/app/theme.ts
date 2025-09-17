@@ -5,12 +5,12 @@ import { createTheme, ThemeOptions } from "@mui/material/styles";
 // Define your color palette - customize these colors using the tools mentioned above
 const colors = {
   primary: {
-    light: "#1976d2", // You can customize this
-    dark: "#90caf9", // Lighter version for dark mode
+    light: "#bdc7bf",
+    dark: "#546357",
   },
   secondary: {
-    light: "#dc004e", // You can customize this
-    dark: "#f48fb1", // Lighter version for dark mode
+    light: "#a8b9a5",
+    dark: "#e1e8d1",
   },
   background: {
     light: "#ffffff",
