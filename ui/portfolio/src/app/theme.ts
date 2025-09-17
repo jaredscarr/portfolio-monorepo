@@ -9,8 +9,8 @@ const colors = {
     dark: "#546357",
   },
   secondary: {
-    light: "#a8b9a5",
-    dark: "#e1e8d1",
+    light: "#ae675b",
+    dark: "#bc8176",
   },
   background: {
     light: "#ffffff",
