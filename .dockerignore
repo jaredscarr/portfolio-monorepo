@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Node modules
+**/node_modules
+**/.next
+**/.turbo
+
+# Go binaries
+**/*.exe
+**/go.work.sum
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.production.local
+**/.env.staging.local
+
+# IDE
+**/.vscode
+**/.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation that's not needed in containers
+**/README.md
+**/docs
+
+# Test files
+**/*_test.go
+**/*.test.js
+**/*.test.ts
+
