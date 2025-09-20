@@ -52,7 +52,7 @@ export default function CaseStudies() {
 
           <Grid container spacing={3}>
             {caseStudies.map((study) => (
-              <Grid item xs={12} md={6} key={study.slug}>
+              <Grid size={{ xs: 12, md: 6 }} key={study.slug}>
                 <Card
                   sx={{
                     height: "100%",

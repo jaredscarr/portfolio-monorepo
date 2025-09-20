@@ -1,12 +1,24 @@
-"use client";
-
 import { Typography, Box, Container, Button, Chip } from "@mui/material";
 import { Navigation } from "../../../components/Navigation";
 import { ArrowBack } from "@mui/icons-material";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-const caseStudyData: Record<string, any> = {
+const caseStudyData: Record<
+  string,
+  {
+    title: string;
+    description: string;
+    technologies: string[];
+    status: string;
+    overview: string;
+    keyFeatures: string[];
+    challenges: string[];
+    learnings: string[];
+    repositoryUrl: string;
+    docsUrl: string;
+  }
+> = {
   "outbox-pattern": {
     title: "Outbox Pattern Implementation",
     description:
@@ -77,17 +89,24 @@ const caseStudyData: Record<string, any> = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export default function CaseStudyDetail({ params }: PageProps) {
-  const study = caseStudyData[params.slug];
+async function getCaseStudy(params: Promise<{ slug: string }>) {
+  const { slug } = await params;
+  const study = caseStudyData[slug];
 
   if (!study) {
     notFound();
   }
+
+  return study;
+}
+
+export default async function CaseStudyDetail({ params }: PageProps) {
+  const study = await getCaseStudy(params);
 
   return (
     <>

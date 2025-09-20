@@ -17,10 +17,10 @@ export default function About() {
             Software Engineer & System Design Enthusiast
           </Typography>
           <Typography variant="body1" sx={{ mb: 3 }}>
-            I'm passionate about exploring modern software architecture patterns
-            and distributed systems design. This portfolio represents my journey
-            of learning and experimenting with various technologies and
-            architectural approaches.
+            I&apos;m passionate about exploring modern software architecture
+            patterns and distributed systems design. This portfolio represents
+            my journey of learning and experimenting with various technologies
+            and architectural approaches.
           </Typography>
           <Typography variant="body1" sx={{ mb: 3 }}>
             Based in the Pacific Northwest, I enjoy diving deep into technical
