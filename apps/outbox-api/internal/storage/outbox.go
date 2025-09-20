@@ -312,7 +312,7 @@ func (s *OutboxStore) GetStats() (*models.StatsResponse, error) {
 			COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_events,
 			COUNT(CASE WHEN status = 'published' THEN 1 END) as published_events,
 			COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_events,
-			SUM(retry_count) as retry_count
+			COALESCE(SUM(retry_count), 0) as retry_count
 		FROM outbox_events
 	`
 
