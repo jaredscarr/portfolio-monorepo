@@ -49,6 +49,7 @@ func main() {
 	r.GET("/flags", handlers.GetFlags)
 	r.GET("/flags/:key", handlers.GetFlagByKey)
 	r.POST("/admin/reload", handlers.ReloadFlags)
+	r.PUT("/admin/flags/:key", handlers.UpdateFlag)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

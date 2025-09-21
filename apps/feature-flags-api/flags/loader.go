@@ -54,3 +54,22 @@ func GetSingleFlag(env, key string) (bool, bool, error) {
 	val, exists := allFlags[key]
 	return val, exists, nil
 }
+
+// UpdateFlag updates a specific flag's value in memory
+func UpdateFlag(env, key string, enabled bool) error {
+	flagsLock.Lock()
+	defer flagsLock.Unlock()
+
+	envFlags, ok := flagsCache[env]
+	if !ok {
+		return fmt.Errorf("flags not loaded for env: %s", env)
+	}
+
+	if _, exists := envFlags[key]; !exists {
+		return fmt.Errorf("flag %s not found in env %s", key, env)
+	}
+
+	// Update the flag value
+	envFlags[key] = enabled
+	return nil
+}
