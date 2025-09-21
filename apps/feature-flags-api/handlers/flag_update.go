@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +10,7 @@ import (
 
 // UpdateFlagRequest represents the request to update a flag
 type UpdateFlagRequest struct {
-	Enabled bool `json:"enabled" binding:"required"`
+	Enabled bool `json:"enabled"`
 }
 
 // UpdateFlag godoc
@@ -37,6 +38,9 @@ func UpdateFlag(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
+
+	// Debug logging
+	fmt.Printf("DEBUG: Updating flag %s in env %s to enabled=%v\n", key, env, req.Enabled)
 
 	// Check if flag exists first
 	_, exists, err := flags.GetSingleFlag(env, key)
