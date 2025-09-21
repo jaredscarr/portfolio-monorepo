@@ -72,7 +72,7 @@ func Load() (*Config, error) {
 			RetryAttempts: 3,
 			RetryDelay:    "1s",
 			MaxRetryDelay: "30s",
-			WebhookURL:    "http://localhost:3000/webhook",
+			WebhookURL:    "http://localhost:3000/api/webhook",
 		},
 		Circuit: CircuitConfig{
 			MaxRequests: 5,
