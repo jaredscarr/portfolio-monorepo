@@ -26,6 +26,7 @@ import { EventsTable } from "../../components/outbox/EventsTable";
 import { CreateEventForm } from "../../components/outbox/CreateEventForm";
 import { EventDetailDialog } from "../../components/outbox/EventDetailDialog";
 import { StatsCards } from "../../components/outbox/StatsCards";
+import { SimulationControls } from "../../components/outbox/SimulationControls";
 import {
   OutboxEvent,
   EventsResponse,
@@ -122,16 +123,30 @@ export default function OutboxPage() {
 
   const handleRetryEvent = async (eventId: string) => {
     try {
-      const response = await fetch(`/api/outbox/events/${eventId}/retry`, {
+      // First, retry the event (sets status to "retrying")
+      const retryResponse = await fetch(`/api/outbox/events/${eventId}/retry`, {
         method: "POST",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!retryResponse.ok) {
+        const errorData = await retryResponse.json();
         throw new Error(errorData.error || "Failed to retry event");
       }
 
-      setSuccess("Event queued for retry");
+      // Then, trigger publishing to actually publish the retrying event
+      const publishResponse = await fetch("/api/outbox/admin/publish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!publishResponse.ok) {
+        throw new Error("Failed to publish retrying events");
+      }
+
+      setSuccess("Event retried and published");
       fetchEvents();
       fetchStats();
     } catch (err) {
@@ -219,6 +234,15 @@ export default function OutboxPage() {
         )}
 
         <StatsCards stats={stats} />
+
+        <Box sx={{ mt: 4 }}>
+          <SimulationControls
+            onSimulationChange={() => {
+              fetchStats();
+              fetchEvents();
+            }}
+          />
+        </Box>
 
         <Paper sx={{ p: 3, mt: 4 }}>
           <Box
