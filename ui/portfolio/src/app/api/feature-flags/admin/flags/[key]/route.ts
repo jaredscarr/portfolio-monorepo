@@ -4,15 +4,16 @@ const FEATURE_FLAGS_API_URL = "http://localhost:4000";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url);
     const env = searchParams.get("env") || "local";
     const body = await request.json();
+    const { key } = await params;
 
     const response = await fetch(
-      `${FEATURE_FLAGS_API_URL}/admin/flags/${params.key}?env=${env}`,
+      `${FEATURE_FLAGS_API_URL}/admin/flags/${key}?env=${env}`,
       {
         method: "PUT",
         headers: {

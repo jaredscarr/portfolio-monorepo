@@ -137,14 +137,28 @@ func (h *Handler) RetryEvent(c *gin.Context) {
 		return
 	}
 
-	// Reset status to retrying
-	err = h.store.UpdateEventStatus(id, models.StatusRetrying, "", event.RetryCount)
+	// Immediately attempt to publish the event
+	err = h.publishEvent(event)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// Publishing failed - update to failed status with incremented retry count
+		h.store.UpdateEventStatus(id, models.StatusFailed, err.Error(), event.RetryCount+1)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "retry attempted but failed", 
+			"error": err.Error(),
+			"retry_count": event.RetryCount + 1,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "event queued for retry"})
+	// Publishing succeeded - update to published status
+	now := time.Now()
+	h.store.UpdateEventStatus(id, models.StatusPublished, "", event.RetryCount)
+	h.store.UpdateEventPublishedAt(id, &now)
+	
+	c.JSON(http.StatusOK, gin.H{
+		"message": "event retried and published successfully",
+		"retry_count": event.RetryCount,
+	})
 }
 
 // DeleteEvent deletes an event by ID

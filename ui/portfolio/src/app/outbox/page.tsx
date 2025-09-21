@@ -123,30 +123,17 @@ export default function OutboxPage() {
 
   const handleRetryEvent = async (eventId: string) => {
     try {
-      // First, retry the event (sets status to "retrying")
-      const retryResponse = await fetch(`/api/outbox/events/${eventId}/retry`, {
+      const response = await fetch(`/api/outbox/events/${eventId}/retry`, {
         method: "POST",
       });
 
-      if (!retryResponse.ok) {
-        const errorData = await retryResponse.json();
+      if (!response.ok) {
+        const errorData = await response.json();
         throw new Error(errorData.error || "Failed to retry event");
       }
 
-      // Then, trigger publishing to actually publish the retrying event
-      const publishResponse = await fetch("/api/outbox/admin/publish", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-
-      if (!publishResponse.ok) {
-        throw new Error("Failed to publish retrying events");
-      }
-
-      setSuccess("Event retried and published");
+      const result = await response.json();
+      setSuccess(result.message);
       fetchEvents();
       fetchStats();
     } catch (err) {

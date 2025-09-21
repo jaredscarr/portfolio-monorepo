@@ -72,7 +72,6 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
 
       // Refresh simulation status
       await fetchSimulationStatus();
-
       // Notify parent component
       onSimulationChange?.();
     } catch (err) {
