@@ -25,6 +25,7 @@ const navigationItems = [
   { label: "About", href: "/about" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Outbox Events", href: "/outbox" },
+  { label: "Status", href: "/status" },
 ];
 
 export function Navigation() {
