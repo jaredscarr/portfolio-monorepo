@@ -236,12 +236,14 @@ export default function OutboxPage() {
             sx={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: { xs: "flex-start", sm: "center" },
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 2, sm: 0 },
               mb: 3,
             }}
           >
             <Typography variant="h6">Events</Typography>
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
