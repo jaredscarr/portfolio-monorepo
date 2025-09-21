@@ -286,7 +286,6 @@ export default function OutboxPage() {
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="published">Published</MenuItem>
                 <MenuItem value="failed">Failed</MenuItem>
-                <MenuItem value="retrying">Retrying</MenuItem>
               </Select>
             </FormControl>
           </Box>
