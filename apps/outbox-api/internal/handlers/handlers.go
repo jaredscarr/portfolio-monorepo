@@ -23,11 +23,11 @@ var ErrPublishingSkipped = errors.New("publishing skipped due to simulation")
 type Handler struct {
 	store           storage.OutboxStoreInterface
 	cfg             *config.Config
-	simulationGates *gates.SimulationGates
+	simulationGates gates.SimulationGatesInterface
 }
 
 // New creates a new handler instance
-func New(store storage.OutboxStoreInterface, cfg *config.Config, simulationGates *gates.SimulationGates) *Handler {
+func New(store storage.OutboxStoreInterface, cfg *config.Config, simulationGates gates.SimulationGatesInterface) *Handler {
 	return &Handler{
 		store:           store,
 		cfg:             cfg,

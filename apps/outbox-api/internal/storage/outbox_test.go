@@ -425,7 +425,7 @@ func TestOutboxStore_GetStats(t *testing.T) {
 			COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_events,
 			COUNT(CASE WHEN status = 'published' THEN 1 END) as published_events,
 			COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_events,
-			SUM(retry_count) as retry_count
+			COALESCE(SUM(retry_count), 0) as retry_count
 		FROM outbox_events`).
 					WillReturnRows(sqlmock.NewRows([]string{"total_events", "pending_events", "published_events", "failed_events", "retry_count"}).
 						AddRow(100, 25, 70, 5, 15))

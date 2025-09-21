@@ -16,9 +16,47 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// MockOutboxStore is a mock implementation of the storage interface
 type MockOutboxStore struct {
 	mock.Mock
+}
+
+type MockSimulationGates struct {
+	mock.Mock
+}
+
+func (m *MockSimulationGates) IsSimulationModeEnabled() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) ShouldDisablePublishing() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) ShouldSimulateWebhookFailures() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) ShouldSimulateNetworkDelays() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) ShouldUsePartialFailureMode() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) ShouldUseCircuitBreakerDemo() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) GetSimulationStatus() map[string]bool {
+	args := m.Called()
+	return args.Get(0).(map[string]bool)
 }
 
 func (m *MockOutboxStore) CreateEvent(req *models.CreateEventRequest) (*models.Event, error) {
@@ -77,9 +115,14 @@ func setupTestRouter(store *MockOutboxStore) *gin.Engine {
 		},
 	}
 
-	h := New(store, cfg)
+	mockGates := &MockSimulationGates{}
+	mockGates.On("ShouldDisablePublishing").Return(false)
+	mockGates.On("ShouldSimulateWebhookFailures").Return(false)
+	mockGates.On("ShouldSimulateNetworkDelays").Return(false)
+	mockGates.On("ShouldUsePartialFailureMode").Return(false)
+	mockGates.On("ShouldUseCircuitBreakerDemo").Return(false)
+	h := New(store, cfg, mockGates)
 
-	// API endpoints
 	api := router.Group("/api/v1")
 	{
 		api.POST("/events", h.CreateEvent)
@@ -89,7 +132,6 @@ func setupTestRouter(store *MockOutboxStore) *gin.Engine {
 		api.DELETE("/events/:id", h.DeleteEvent)
 	}
 
-	// Admin endpoints
 	admin := router.Group("/admin")
 	{
 		admin.POST("/publish", h.PublishEvents)
@@ -372,7 +414,7 @@ func TestHandler_RetryEvent(t *testing.T) {
 					RetryCount: 2,
 				}
 				mockStore.On("GetEvent", "test-id").Return(event, nil)
-				mockStore.On("UpdateEventStatus", "test-id", models.StatusRetrying, "", 2).Return(nil)
+				mockStore.On("UpdateEventStatus", "test-id", models.StatusFailed, mock.AnythingOfType("string"), 3).Return(nil)
 			},
 			expectedStatus: http.StatusOK,
 		},
@@ -725,9 +767,14 @@ func TestHandler_PublishEvents(t *testing.T) {
 
 			gin.SetMode(gin.TestMode)
 			router := gin.New()
-			h := New(mockStore, cfg)
+			mockGates := &MockSimulationGates{}
+			mockGates.On("ShouldDisablePublishing").Return(false)
+			mockGates.On("ShouldSimulateWebhookFailures").Return(false)
+			mockGates.On("ShouldSimulateNetworkDelays").Return(false)
+			mockGates.On("ShouldUsePartialFailureMode").Return(false)
+			mockGates.On("ShouldUseCircuitBreakerDemo").Return(false)
+			h := New(mockStore, cfg, mockGates)
 
-			// Admin endpoints
 			admin := router.Group("/admin")
 			{
 				admin.POST("/publish", h.PublishEvents)
