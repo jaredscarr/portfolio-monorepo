@@ -7,6 +7,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/config"
+	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/gates"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/handlers"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/storage"
 	observability "github.com/jared-scarr/portfolio-monorepo/packages/observability/handlers"
@@ -29,8 +30,12 @@ func main() {
 	// Initialize storage layer
 	store := storage.NewOutboxStore(db)
 
+	// Initialize feature flag client and simulation gates
+	flagsClient := gates.NewHTTPFeatureFlagClient("http://localhost:4000")
+	simulationGates := gates.NewSimulationGates(flagsClient, "local")
+
 	// Initialize handlers
-	h := handlers.New(store, cfg)
+	h := handlers.New(store, cfg, simulationGates)
 
 	// Setup Gin router
 	router := gin.Default()
@@ -67,6 +72,7 @@ func main() {
 	{
 		admin.POST("/publish", h.PublishEvents)
 		admin.GET("/stats", h.GetStats)
+		admin.GET("/simulation-status", h.GetSimulationStatus)
 	}
 
 	// Start server

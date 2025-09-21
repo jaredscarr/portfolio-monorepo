@@ -1,4 +1,10 @@
 {
     "metrics_enabled": false,
-    "advanced_debugging_enabled": true
+    "advanced_debugging_enabled": true,
+    "simulation_mode_enabled": true,
+    "force_webhook_failures": false,
+    "disable_publishing": false,
+    "circuit_breaker_demo_mode": false,
+    "partial_failure_mode": false,
+    "simulate_network_delays": false
 }

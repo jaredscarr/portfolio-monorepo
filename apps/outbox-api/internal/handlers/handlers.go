@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,21 +11,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/config"
+	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/gates"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/models"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/storage"
 )
 
+// Special error to indicate publishing was skipped due to simulation
+var ErrPublishingSkipped = errors.New("publishing skipped due to simulation")
+
 // Handler handles HTTP requests for the outbox API
 type Handler struct {
-	store storage.OutboxStoreInterface
-	cfg   *config.Config
+	store           storage.OutboxStoreInterface
+	cfg             *config.Config
+	simulationGates *gates.SimulationGates
 }
 
 // New creates a new handler instance
-func New(store storage.OutboxStoreInterface, cfg *config.Config) *Handler {
+func New(store storage.OutboxStoreInterface, cfg *config.Config, simulationGates *gates.SimulationGates) *Handler {
 	return &Handler{
-		store: store,
-		cfg:   cfg,
+		store:           store,
+		cfg:             cfg,
+		simulationGates: simulationGates,
 	}
 }
 
@@ -206,16 +213,38 @@ func (h *Handler) PublishEvents(c *gin.Context) {
 	// Publish events
 	published := 0
 	failed := 0
-	var errors []string
+	var errorMessages []string
 
-	for _, event := range events {
-		err := h.publishEvent(&event)
+	for i, event := range events {
+		var err error
+		
+		// Check for partial failure simulation
+		if h.simulationGates.ShouldUsePartialFailureMode() {
+			// Simulate partial failures - every 3rd event fails, others succeed
+			if i%3 == 2 {
+				err = fmt.Errorf("simulated partial batch failure (event %d in batch)", i+1)
+			} else {
+				// Simulate success without actual webhook call
+				err = nil
+				fmt.Printf("DEBUG: Simulated success for event %s (partial failure mode)\n", event.ID)
+			}
+		} else {
+			err = h.publishEvent(&event)
+		}
+		
 		if err != nil {
-			failed++
-			errors = append(errors, fmt.Sprintf("Event %s: %v", event.ID, err))
+			if errors.Is(err, ErrPublishingSkipped) {
+				// Publishing was skipped due to simulation - don't count as published or failed
+				fmt.Printf("DEBUG: Event %s skipped due to simulation\n", event.ID)
+				// Event stays in pending state - no status update needed
+			} else {
+				// Actual failure
+				failed++
+				errorMessages = append(errorMessages, fmt.Sprintf("Event %s: %v", event.ID, err))
 
-			// Update event status to failed
-			h.store.UpdateEventStatus(event.ID, models.StatusFailed, err.Error(), event.RetryCount+1)
+				// Update event status to failed
+				h.store.UpdateEventStatus(event.ID, models.StatusFailed, err.Error(), event.RetryCount+1)
+			}
 		} else {
 			published++
 
@@ -229,7 +258,7 @@ func (h *Handler) PublishEvents(c *gin.Context) {
 	response := models.PublishResponse{
 		Published: published,
 		Failed:    failed,
-		Errors:    errors,
+		Errors:    errorMessages,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -244,6 +273,14 @@ func (h *Handler) GetStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, stats)
+}
+
+// GetSimulationStatus returns current simulation gate status
+func (h *Handler) GetSimulationStatus(c *gin.Context) {
+	status := h.simulationGates.GetSimulationStatus()
+	c.JSON(http.StatusOK, gin.H{
+		"simulation_status": status,
+	})
 }
 
 // getEventsByIDs retrieves specific events by their IDs
@@ -267,6 +304,26 @@ func (h *Handler) getEventsByIDs(eventIDs []string) ([]models.Event, error) {
 
 // publishEvent sends an event to the webhook URL
 func (h *Handler) publishEvent(event *models.Event) error {
+	// Check simulation gates first
+	shouldDisable := h.simulationGates.ShouldDisablePublishing()
+	fmt.Printf("DEBUG: ShouldDisablePublishing() = %v for event %s\n", shouldDisable, event.ID)
+	
+	if shouldDisable {
+		// Simulate disabled publishing - keep event in pending state
+		fmt.Printf("DEBUG: Publishing disabled by simulation gate for event %s\n", event.ID)
+		return ErrPublishingSkipped
+	}
+
+	if h.simulationGates.ShouldSimulateWebhookFailures() {
+		// Force webhook failure simulation
+		return fmt.Errorf("simulated webhook failure (forced by feature gate)")
+	}
+
+	if h.simulationGates.ShouldSimulateNetworkDelays() {
+		// Add artificial delay to simulate network issues
+		time.Sleep(2 * time.Second)
+	}
+
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 30 * time.Second, // Default timeout, could be made configurable
