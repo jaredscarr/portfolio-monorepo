@@ -30,6 +30,9 @@ interface SimulationStatus {
   circuit_breaker_demo_mode: boolean;
   partial_failure_mode: boolean;
   simulate_network_delays: boolean;
+  circuit_breaker_state: string;
+  circuit_failure_count: number;
+  circuit_last_failure: string;
 }
 
 export default function StatusPage() {
@@ -301,6 +304,56 @@ export default function StatusPage() {
 
                     {simulationStatus.simulation_mode_enabled && (
                       <>
+                        {simulationStatus.circuit_breaker_demo_mode && (
+                          <Box
+                            sx={{
+                              mt: 2,
+                              p: 2,
+                              border: "1px solid #ddd",
+                              borderRadius: 1,
+                            }}
+                          >
+                            <Typography variant="subtitle2" gutterBottom>
+                              Circuit Breaker Status
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                mb: 1,
+                              }}
+                            >
+                              <Typography variant="body2">State:</Typography>
+                              <Chip
+                                label={simulationStatus.circuit_breaker_state}
+                                color={
+                                  simulationStatus.circuit_breaker_state ===
+                                  "CLOSED"
+                                    ? "success"
+                                    : simulationStatus.circuit_breaker_state ===
+                                      "OPEN"
+                                    ? "error"
+                                    : "warning"
+                                }
+                                size="small"
+                              />
+                            </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Typography variant="body2">Failures:</Typography>
+                              <Typography variant="body2">
+                                {simulationStatus.circuit_failure_count}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        )}
+
                         {simulationStatus.disable_publishing && (
                           <Alert severity="warning" sx={{ mt: 1 }}>
                             Publishing is disabled - events will remain pending

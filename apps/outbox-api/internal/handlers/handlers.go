@@ -52,7 +52,6 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"event": event})
 }
 
-// GetEvent retrieves an event by ID
 func (h *Handler) GetEvent(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -114,7 +113,6 @@ func (h *Handler) ListEvents(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// RetryEvent retries publishing a failed event
 func (h *Handler) RetryEvent(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -161,7 +159,6 @@ func (h *Handler) RetryEvent(c *gin.Context) {
 	})
 }
 
-// DeleteEvent deletes an event by ID
 func (h *Handler) DeleteEvent(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -182,7 +179,6 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "event deleted"})
 }
 
-// PublishEvents publishes pending events
 func (h *Handler) PublishEvents(c *gin.Context) {
 	var req models.PublishRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -278,7 +274,6 @@ func (h *Handler) PublishEvents(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetStats returns service statistics
 func (h *Handler) GetStats(c *gin.Context) {
 	stats, err := h.store.GetStats()
 	if err != nil {
@@ -289,7 +284,6 @@ func (h *Handler) GetStats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-// GetSimulationStatus returns current simulation gate status
 func (h *Handler) GetSimulationStatus(c *gin.Context) {
 	status := h.simulationGates.GetSimulationStatus()
 	c.JSON(http.StatusOK, gin.H{
@@ -297,7 +291,6 @@ func (h *Handler) GetSimulationStatus(c *gin.Context) {
 	})
 }
 
-// getEventsByIDs retrieves specific events by their IDs
 func (h *Handler) getEventsByIDs(eventIDs []string) ([]models.Event, error) {
 	var events []models.Event
 
@@ -316,21 +309,20 @@ func (h *Handler) getEventsByIDs(eventIDs []string) ([]models.Event, error) {
 	return events, nil
 }
 
-// publishEvent sends an event to the webhook URL
 func (h *Handler) publishEvent(event *models.Event) error {
-	// Check simulation gates first
+
 	shouldDisable := h.simulationGates.ShouldDisablePublishing()
 	fmt.Printf("DEBUG: ShouldDisablePublishing() = %v for event %s\n", shouldDisable, event.ID)
 	
 	if shouldDisable {
-		// Simulate disabled publishing - keep event in pending state
 		fmt.Printf("DEBUG: Publishing disabled by simulation gate for event %s\n", event.ID)
 		return ErrPublishingSkipped
 	}
 
-	if h.simulationGates.ShouldSimulateWebhookFailures() {
-		// Force webhook failure simulation
-		return fmt.Errorf("simulated webhook failure (forced by feature gate)")
+	if h.simulationGates.CheckCircuitBreaker() {
+		// Circuit is open - fail fast without making request
+		fmt.Printf("DEBUG: Circuit breaker OPEN - failing fast for event %s\n", event.ID)
+		return fmt.Errorf("circuit breaker is open - request blocked")
 	}
 
 	if h.simulationGates.ShouldSimulateNetworkDelays() {
@@ -338,12 +330,16 @@ func (h *Handler) publishEvent(event *models.Event) error {
 		time.Sleep(2 * time.Second)
 	}
 
-	// Create HTTP client with timeout
+	// Check for forced failures AFTER circuit breaker and delays
+	if h.simulationGates.ShouldSimulateWebhookFailures() {
+		h.simulationGates.RecordCircuitBreakerFailure() // Record failure for circuit breaker
+		return fmt.Errorf("simulated webhook failure (forced by feature gate)")
+	}
+
 	client := &http.Client{
 		Timeout: 30 * time.Second, // Default timeout, could be made configurable
 	}
 
-	// Prepare the webhook payload
 	payload := map[string]interface{}{
 		"id":         event.ID,
 		"type":       event.Type,
@@ -353,33 +349,31 @@ func (h *Handler) publishEvent(event *models.Event) error {
 		"created_at": event.CreatedAt,
 	}
 
-	// Marshal payload to JSON
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal event data: %w", err)
 	}
 
-	// Create HTTP request
 	req, err := http.NewRequest("POST", h.cfg.Publish.WebhookURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	// Set headers
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "outbox-api/1.0")
 
-	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
+		h.simulationGates.RecordCircuitBreakerFailure()
 		return fmt.Errorf("failed to send webhook request: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// Check response status
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		h.simulationGates.RecordCircuitBreakerFailure()
 		return fmt.Errorf("webhook returned status %d", resp.StatusCode)
 	}
 
+	h.simulationGates.RecordCircuitBreakerSuccess()
 	return nil
 }

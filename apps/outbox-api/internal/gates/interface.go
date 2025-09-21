@@ -8,5 +8,8 @@ type SimulationGatesInterface interface {
 	ShouldSimulateNetworkDelays() bool
 	ShouldUsePartialFailureMode() bool
 	ShouldUseCircuitBreakerDemo() bool
-	GetSimulationStatus() map[string]bool
+	CheckCircuitBreaker() bool
+	RecordCircuitBreakerSuccess()
+	RecordCircuitBreakerFailure()
+	GetSimulationStatus() map[string]interface{}
 }
