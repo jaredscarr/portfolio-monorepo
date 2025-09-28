@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { Box, Typography } from "@mui/material";
 import { theme } from "./theme";
 
 const geistSans = Geist({
@@ -29,11 +30,26 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       >
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            {children}
+            <Box sx={{ flex: 1 }}>{children}</Box>
+            <Box
+              component="footer"
+              sx={{
+                py: 2,
+                px: 2,
+                textAlign: "center",
+                borderTop: 1,
+                borderColor: "divider",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                © {new Date().getFullYear()} Jared Scarr. All rights reserved.
+              </Typography>
+            </Box>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
