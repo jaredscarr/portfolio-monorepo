@@ -17,6 +17,7 @@ const caseStudyData: Record<
     learnings: string[];
     repositoryUrl: string;
     docsUrl: string;
+    liveApiUrl: string;
   }
 > = {
   "outbox-pattern": {
@@ -51,7 +52,8 @@ const caseStudyData: Record<
       "System observability and monitoring",
     ],
     repositoryUrl: "https://github.com/yourusername/outbox-api",
-    docsUrl: "/docs/outbox-api",
+    docsUrl: "http://localhost:8080/swagger/index.html",
+    liveApiUrl: "/outbox",
   },
   "feature-flags-api": {
     title: "Feature Flags Service",
@@ -84,7 +86,45 @@ const caseStudyData: Record<
       "Documentation and API usability",
     ],
     repositoryUrl: "https://github.com/yourusername/feature-flags-api",
-    docsUrl: "/docs/feature-flags-api",
+    docsUrl: "http://localhost:4000/swagger/index.html",
+    liveApiUrl: "http://localhost:4000",
+  },
+  observability: {
+    title: "Observability",
+    description:
+      "A standardized observability service providing health checks, readiness probes, and Prometheus metrics exposure.",
+    technologies: ["Go", "Prometheus", "Swagger", "OpenAPI", "Unit Testing"],
+    status: "Completed",
+    overview: `
+      The Metrics API provides basic observability endpoints for services in this portfolio, 
+      standardizing health checks, readiness checks, and Prometheus metrics exposure. This 
+      service establishes a minimal baseline for monitoring with health, readiness, HTTP 
+      counters, latency histograms, and Go runtime metrics.
+    `,
+    keyFeatures: [
+      "Standardized health and readiness probe endpoints",
+      "Prometheus metrics exposure in text format",
+      "HTTP request counters and latency histograms",
+      "Go runtime metrics monitoring",
+      "Comprehensive Swagger/OpenAPI documentation",
+      "Extensive unit test coverage with benchmarks",
+    ],
+    challenges: [
+      "Designing a flexible metrics registration system",
+      "Ensuring consistent observability across all services",
+      "Balancing minimal overhead with comprehensive monitoring",
+      "Creating reusable patterns for future service integration",
+    ],
+    learnings: [
+      "Observability best practices in distributed systems",
+      "Prometheus metrics design and implementation",
+      "Comprehensive testing strategies including benchmarks",
+      "API documentation with Swagger/OpenAPI standards",
+      "Go runtime monitoring and performance analysis",
+    ],
+    repositoryUrl: "https://github.com/yourusername/observability",
+    docsUrl: "http://localhost:8081/docs/index.html",
+    liveApiUrl: "http://localhost:8081",
   },
 };
 
@@ -190,8 +230,11 @@ export default async function CaseStudyDetail({ params }: PageProps) {
             >
               View Repository
             </Button>
-            <Button variant="outlined" href={study.docsUrl}>
-              API Documentation
+            <Button variant="outlined" href={study.docsUrl} target="_blank">
+              Swagger Docs
+            </Button>
+            <Button variant="outlined" href={study.liveApiUrl} target="_blank">
+              Live API
             </Button>
           </Box>
         </Box>

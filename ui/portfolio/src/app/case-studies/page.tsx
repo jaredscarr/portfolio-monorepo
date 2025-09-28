@@ -29,6 +29,14 @@ const caseStudies = [
     technologies: ["Go", "JSON Config", "REST API"],
     status: "In Progress",
   },
+  {
+    slug: "observability",
+    title: "Observability",
+    description:
+      "A standardized observability service providing health checks, readiness probes, and Prometheus metrics exposure.",
+    technologies: ["Go", "Prometheus", "Swagger", "OpenAPI"],
+    status: "Completed",
+  },
 ];
 
 export default function CaseStudies() {

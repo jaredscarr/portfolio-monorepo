@@ -12,7 +12,7 @@ export default function Home() {
           sx={{
             py: 4,
             pt: { xs: 4, sm: 8, md: 12, lg: 20 },
-            pl: { xs: 2, sm: 4, md: 8, lg: 25 },
+            textAlign: "center",
           }}
         >
           <Typography
@@ -26,7 +26,14 @@ export default function Home() {
           <Typography variant="h5" color="text.secondary" sx={{ mb: 6 }}>
             Software Engineer, Full Stack, & Aspiring Architect
           </Typography>
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Button variant="contained" color="primary" href="/case-studies">
               View Case Studies
             </Button>
