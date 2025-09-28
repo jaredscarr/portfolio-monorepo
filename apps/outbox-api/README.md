@@ -210,6 +210,30 @@ This prevents sensitive data from being stored in configuration files that might
 - `POST /admin/publish` - Manually trigger event publishing
 - `GET /admin/stats` - Get service statistics
 
+## API Documentation
+
+Interactive Swagger documentation is available when the service is running:
+
+- **Swagger UI**: http://localhost:8080/swagger/index.html
+- **Raw JSON**: http://localhost:8080/swagger/doc.json
+
+### Updating API Documentation
+
+When you modify API endpoints or add new ones, regenerate the Swagger documentation:
+
+```bash
+# Install swag CLI tool (if not already installed)
+go install github.com/swaggo/swag/cmd/swag@latest
+
+# Generate Swagger documentation
+swag init -g main.go -o docs/ -ot json
+
+# Restart the server to serve updated docs
+go run .
+```
+
+The documentation will automatically reflect changes to endpoint handlers and their Swagger annotations.
+
 ## Usage Examples
 
 ### Creating an Event

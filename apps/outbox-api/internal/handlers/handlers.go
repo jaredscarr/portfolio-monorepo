@@ -35,7 +35,13 @@ func New(store storage.OutboxStoreInterface, cfg *config.Config, simulationGates
 	}
 }
 
-// CreateEvent creates a new outbox event
+// CreateEvent godoc
+// @Summary Create a new outbox event
+// @Produce json
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/events [post]
 func (h *Handler) CreateEvent(c *gin.Context) {
 	var req models.CreateEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -52,6 +58,14 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"event": event})
 }
 
+// GetEvent godoc
+// @Summary Get event by ID
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/events/{id} [get]
 func (h *Handler) GetEvent(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {

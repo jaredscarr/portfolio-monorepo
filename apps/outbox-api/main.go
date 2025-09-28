@@ -6,6 +6,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	docs "github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/docs"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/config"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/gates"
 	"github.com/jared-scarr/portfolio-monorepo/apps/outbox-api/internal/handlers"
@@ -13,7 +17,17 @@ import (
 	observability "github.com/jared-scarr/portfolio-monorepo/packages/observability/handlers"
 )
 
+// @title Outbox API
+// @version 1.0.0
+// @description A transactional outbox pattern implementation for reliable event publishing
+// @BasePath /
+// @schemes http
+// @produce json
 func main() {
+	docs.SwaggerInfo.Title = "Outbox API"
+	docs.SwaggerInfo.Version = "1.0.0"
+	docs.SwaggerInfo.BasePath = "/"
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -74,6 +88,8 @@ func main() {
 		admin.GET("/stats", h.GetStats)
 		admin.GET("/simulation-status", h.GetSimulationStatus)
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Start server
 	port := os.Getenv("PORT")
