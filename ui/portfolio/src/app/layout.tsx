@@ -3,7 +3,8 @@ import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
+import { GitHub, LinkedIn } from "@mui/icons-material";
 import { theme } from "./theme";
 
 const geistSans = Geist({
@@ -46,6 +47,37 @@ export default function RootLayout({
                 borderColor: "divider",
               }}
             >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 1,
+                  mb: 1,
+                }}
+              >
+                <IconButton
+                  component="a"
+                  href="https://github.com/jaredscarr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="inherit"
+                  aria-label="GitHub profile"
+                  size="small"
+                >
+                  <GitHub />
+                </IconButton>
+                <IconButton
+                  component="a"
+                  href="https://linkedin.com/in/jaredscarr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="inherit"
+                  aria-label="LinkedIn profile"
+                  size="small"
+                >
+                  <LinkedIn />
+                </IconButton>
+              </Box>
               <Typography variant="body2" color="text.secondary">
                 © {new Date().getFullYear()} Jared Scarr. All rights reserved.
               </Typography>

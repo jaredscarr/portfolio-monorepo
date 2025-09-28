@@ -7,19 +7,24 @@ export default function Home() {
   return (
     <>
       <Navigation />
-
       <Container maxWidth="lg">
-        <Box sx={{ py: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            Welcome to My Portfolio
+        <Box
+          sx={{
+            py: 4,
+            pt: { xs: 4, sm: 8, md: 12, lg: 20 },
+            pl: { xs: 2, sm: 4, md: 8, lg: 25 },
+          }}
+        >
+          <Typography
+            variant="h1"
+            component="h1"
+            gutterBottom
+            sx={{ fontWeight: "fontWeightBold" }}
+          >
+            JARED SCARR
           </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-            Exploring software architecture and system design through hands-on
-            case studies
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 3 }}>
-            This portfolio showcases my technical explorations and learning
-            journey through various software engineering patterns and practices.
+          <Typography variant="h5" color="text.secondary" sx={{ mb: 6 }}>
+            Software Engineer, Full Stack, & Aspiring Architect
           </Typography>
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             <Button variant="contained" color="primary" href="/case-studies">

@@ -48,7 +48,7 @@ export default function StatusPage() {
       status: "loading",
     },
     {
-      name: "Metrics API",
+      name: "Observability",
       url: "http://localhost:8081/health",
       status: "loading",
     },

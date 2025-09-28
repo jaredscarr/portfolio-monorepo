@@ -14,7 +14,12 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
+import {
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  GitHub,
+  LinkedIn,
+} from "@mui/icons-material";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -115,6 +120,32 @@ export function Navigation() {
 
           {/* Spacer for mobile */}
           {isMobile && <Box sx={{ flexGrow: 1 }} />}
+
+          {/* Social Links */}
+          <Box sx={{ display: "flex", gap: 1, mr: 2 }}>
+            <IconButton
+              component="a"
+              href="https://github.com/jaredscarr"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="inherit"
+              aria-label="GitHub profile"
+              size="small"
+            >
+              <GitHub />
+            </IconButton>
+            <IconButton
+              component="a"
+              href="https://linkedin.com/in/jaredscarr"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="inherit"
+              aria-label="LinkedIn profile"
+              size="small"
+            >
+              <LinkedIn />
+            </IconButton>
+          </Box>
 
           <ThemeToggle />
         </Toolbar>
