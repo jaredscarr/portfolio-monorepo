@@ -15,12 +15,127 @@ This service provides a central source of truth for environment-specific feature
 - Flags can be hot-reloaded via an admin endpoint without restarting the service
 - Swagger docs are available at: [http://localhost:4000/swagger/index.html](http://localhost:4000/swagger/index.html)
 
-## Usage
+## Quick Start
+
+### Prerequisites
+
+- Go 1.25+
+- Docker (recommended)
+
+### Local Development
 
 Start the service:
 
 ```bash
 go run .
+```
+
+The service will start on port 4000 by default.
+
+### Docker Deployment (Recommended)
+
+The service is fully containerized and can be deployed as a standalone service:
+
+1. **Build the Docker image**:
+
+   ```bash
+   # From the monorepo root
+   docker build -f apps/feature-flags-api/Dockerfile -t feature-flags-api:latest .
+   ```
+
+2. **Run the feature-flags-api container**:
+
+   ```bash
+   docker run --name feature-flags-api \
+     -p 4000:4000 \
+     -d feature-flags-api:latest
+   ```
+
+3. **Verify the service is running**:
+
+   ```bash
+   # Check container status
+   docker ps
+   
+   # Test health endpoint
+   curl http://localhost:4000/health
+   
+   # Test flags endpoint
+   curl "http://localhost:4000/flags?env=local"
+   
+   # View logs
+   docker logs feature-flags-api
+   ```
+
+4. **Stop the service**:
+
+   ```bash
+   docker stop feature-flags-api
+   docker rm feature-flags-api
+   ```
+
+## API Endpoints
+
+### Health & Monitoring
+
+- `GET /health` - Health check endpoint
+- `GET /ready` - Readiness check endpoint  
+- `GET /metrics` - Prometheus metrics endpoint
+
+### Feature Flags
+
+- `GET /flags?env={local|prod}` - Get all flags for environment
+- `GET /flags/:key?env={local|prod}` - Get specific flag by key
+
+### Administration
+
+- `POST /admin/reload` - Reload flags from disk
+- `PUT /admin/flags/:key` - Update a flag value
+
+## API Documentation
+
+Interactive Swagger documentation is available when the service is running:
+
+- **Swagger UI**: http://localhost:4000/swagger/index.html
+- **Raw JSON**: http://localhost:4000/swagger/doc.json
+
+### Example Usage
+
+**Get all local flags:**
+```bash
+curl "http://localhost:4000/flags?env=local"
+```
+
+**Get specific flag:**
+```bash
+curl "http://localhost:4000/flags/simulation_mode_enabled?env=local"
+```
+
+**Reload flags:**
+```bash
+curl -X POST http://localhost:4000/admin/reload
+```
+
+## Configuration
+
+The service uses static JSON files for configuration. Flag files are located in the `flags/` directory:
+
+- `flags/local.json` - Local environment flags
+- `flags/prod.json` - Production environment flags
+
+### Flag File Format
+
+```json
+{
+  "simulation_mode_enabled": true,
+  "advanced_debugging_enabled": true,
+  "circuit_breaker_demo_mode": false,
+  "disable_publishing": false,
+  "force_webhook_failures": false,
+  "metrics_enabled": false,
+  "partial_failure_mode": false,
+  "simulate_network_delays": false
+}
 ```
 
 ## Testing
