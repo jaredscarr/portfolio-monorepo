@@ -100,7 +100,28 @@ Use Docker Compose to run the entire stack:
 docker-compose up --build -d
 ```
 
-This will start all services with proper dependencies and health checks.
+**Verify the deployment:**
+```bash
+# Check all services are running
+docker-compose ps
+
+# Test individual services
+curl http://localhost:3000/health  # Portfolio UI
+curl http://localhost:8080/health  # Outbox API
+curl http://localhost:4000/health  # Feature Flags API
+curl http://localhost:8081/health   # Observability API
+```
+
+**Access the applications:**
+- **Portfolio UI**: http://localhost:3000
+- **Outbox API**: http://localhost:8080/swagger/index.html
+- **Feature Flags API**: http://localhost:4000/swagger/index.html
+- **Observability API**: http://localhost:8081/docs/index.html
+
+**Stop the stack:**
+```bash
+docker-compose down
+```
 
 ---
 

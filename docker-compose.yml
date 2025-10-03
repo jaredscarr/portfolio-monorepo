@@ -42,6 +42,34 @@ services:
       retries: 3
       start_period: 40s
 
+  observability-api:
+    build:
+      context: .
+      dockerfile: packages/observability/Dockerfile
+    container_name: portfolio-observability-api
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  feature-flags-api:
+    build:
+      context: .
+      dockerfile: apps/feature-flags-api/Dockerfile
+    container_name: portfolio-feature-flags-api
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   portfolio:
     build:
       context: .
@@ -52,8 +80,14 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_OUTBOX_API_URL: http://outbox-api:8080
+      NEXT_PUBLIC_FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
+      NEXT_PUBLIC_OBSERVABILITY_API_URL: http://observability-api:8081
     depends_on:
       outbox-api:
+        condition: service_healthy
+      feature-flags-api:
+        condition: service_healthy
+      observability-api:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
