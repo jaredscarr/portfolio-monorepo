@@ -1,0 +1,71 @@
+# Caddyfile for Portfolio Monorepo
+# Replace 'your-domain.com' with your actual domain
+
+{
+    # Global options
+    auto_https off
+}
+
+# Main portfolio UI
+jaredscarr.com {
+    reverse_proxy portfolio:3000
+    
+    # Health check endpoint
+    handle /health {
+        reverse_proxy portfolio:3000
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
+
+# API endpoints with subdomains
+api.jaredscarr.com {
+    # Route to different services based on path
+    handle /outbox/* {
+        reverse_proxy outbox-api:8080
+    }
+    
+    handle /flags/* {
+        reverse_proxy feature-flags-api:4000
+    }
+    
+    handle /observability/* {
+        reverse_proxy observability-api:8081
+    }
+    
+    # Default to outbox-api for root API calls
+    handle {
+        reverse_proxy outbox-api:8080
+    }
+    
+    log {
+        output file /var/log/caddy/api.log
+        format json
+    }
+}
+
+# Direct service access (for development/admin)
+outbox.jaredscarr.com {
+    reverse_proxy outbox-api:8080
+}
+
+flags.jaredscarr.com {
+    reverse_proxy feature-flags-api:4000
+}
+
+metrics.jaredscarr.com {
+    reverse_proxy observability-api:8081
+}
+
+# Redirect HTTP to HTTPS
+http://jaredscarr.com {
+    redir https://jaredscarr.com{uri} permanent
+}
+
+http://api.jaredscarr.com {
+    redir https://api.jaredscarr.com{uri} permanent
+}
