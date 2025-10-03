@@ -5,19 +5,134 @@ It standardizes health checks, readiness checks, and Prometheus metrics exposure
 
 The metrics-api provides a minimal baseline (health, readiness, HTTP counters, latency histograms, Go runtime metrics). As additional services are added, domain-specific metrics will be registered where they provide value.
 
-## Endpoints
+## Quick Start
 
-- `GET /health` → Liveness probe  
-- `GET /ready` → Readiness probe  
-- `GET /metrics` → Prometheus metrics (text format)  
-- `GET /docs/index.html` → Swagger UI (OpenAPI docs)  
-- `GET /openapi.json` → OpenAPI spec  
+### Prerequisites
 
-## Running Locally
+- Go 1.25+
+- Docker (recommended)
+
+### Local Development
+
+Start the service:
 
 ```bash
 go run .
 ```
+
+The service will start on port 8081 by default.
+
+### Docker Deployment (Recommended)
+
+The service is fully containerized and can be deployed as a standalone service:
+
+1. **Build the Docker image**:
+
+   ```bash
+   # From the monorepo root
+   docker build -f packages/observability/Dockerfile -t metrics-api:latest .
+   ```
+
+2. **Run the metrics-api container**:
+
+   ```bash
+   docker run --name metrics-api \
+     -p 8081:8081 \
+     -d metrics-api:latest
+   ```
+
+3. **Verify the service is running**:
+
+   ```bash
+   # Check container status
+   docker ps
+   
+   # Test health endpoint
+   curl http://localhost:8081/health
+   
+   # Test readiness endpoint
+   curl http://localhost:8081/ready
+   
+   # Test metrics endpoint
+   curl http://localhost:8081/metrics
+   
+   # View logs
+   docker logs metrics-api
+   ```
+
+4. **Stop the service**:
+
+   ```bash
+   docker stop metrics-api
+   docker rm metrics-api
+   ```
+
+## Endpoints
+
+### Health & Monitoring
+
+- `GET /health` - Liveness probe (returns `{"status":"ok"}`)
+- `GET /ready` - Readiness probe (returns `{"status":"ready"}`)
+- `GET /metrics` - Prometheus metrics in text format
+
+### API Documentation
+
+- `GET /docs/index.html` - Swagger UI (OpenAPI docs)
+- `GET /docs/doc.json` - OpenAPI specification in JSON format
+
+## API Documentation
+
+Interactive Swagger documentation is available when the service is running:
+
+- **Swagger UI**: http://localhost:8081/docs/index.html
+- **Raw JSON**: http://localhost:8081/docs/doc.json
+
+### Example Usage
+
+**Health check:**
+```bash
+curl http://localhost:8081/health
+# Response: {"status":"ok"}
+```
+
+**Readiness check:**
+```bash
+curl http://localhost:8081/ready
+# Response: {"status":"ready"}
+```
+
+**Prometheus metrics:**
+```bash
+curl http://localhost:8081/metrics
+# Response: Prometheus-formatted metrics
+```
+
+## Metrics Provided
+
+The service exposes the following Prometheus metrics:
+
+### Go Runtime Metrics
+- `go_gc_duration_seconds` - Garbage collection duration
+- `go_goroutines` - Number of goroutines
+- `go_memstats_*` - Memory statistics
+- `go_threads` - Number of OS threads
+
+### HTTP Metrics
+- `http_requests_total` - Total HTTP requests by method, path, and status
+- `http_request_duration_seconds` - HTTP request latency histogram
+
+### Process Metrics
+- `process_cpu_seconds_total` - CPU time consumed
+- `process_memory_bytes` - Memory usage
+- `process_open_fds` - Open file descriptors
+
+## Configuration
+
+The service runs with minimal configuration:
+
+- **Port**: 8081 (hardcoded)
+- **No external dependencies**: Self-contained service
+- **No configuration files**: Uses defaults for all settings
 
 ## Testing
 

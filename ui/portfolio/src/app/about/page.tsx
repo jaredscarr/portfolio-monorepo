@@ -17,20 +17,14 @@ export default function About() {
             Software Engineer & System Design Enthusiast
           </Typography>
           <Typography variant="body1" sx={{ mb: 3 }}>
-            I&apos;m passionate about exploring modern software architecture
-            patterns and distributed systems design. This portfolio represents
-            my journey of learning and experimenting with various technologies
-            and architectural approaches.
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 3 }}>
-            Based in the Pacific Northwest, I enjoy diving deep into technical
-            challenges and sharing my findings through practical implementations
-            and case studies.
+            I&apos;m a Full Stack Software Engineer with experience developing
+            and maintaining web applications, automation tools, and data
+            processing systems.
           </Typography>
           <Typography variant="body1">
-            Each case study in this portfolio represents a hands-on exploration
-            of a specific pattern, technology, or architectural concept that I
-            found interesting and worth investigating further.
+            Each case study represents practical implementations of concepts
+            I&apos;ve encountered in professional settings, demonstrating my
+            commitment to continuous learning and technical excellence.
           </Typography>
         </Box>
       </Container>
