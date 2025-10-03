@@ -10,13 +10,13 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title Metrics API
+// @title Observability API
 // @version 0.1
 // @description Provides health checks and Prometheus metrics.
 // @host localhost:8081
 // @BasePath /
 func main() {
-	docs.SwaggerInfo.Title = "Metrics API"
+	docs.SwaggerInfo.Title = "Observability API"
 	docs.SwaggerInfo.Description = "Provides health checks and Prometheus metrics."
 	docs.SwaggerInfo.Version = "0.1"
 	docs.SwaggerInfo.Host = "localhost:8081"
@@ -34,7 +34,7 @@ func main() {
 	// Swagger docs
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	log.Println("Metrics API running at http://localhost:8081")
+	log.Println("Observability API running at http://localhost:8081")
 	log.Println("Swagger docs available at http://localhost:8081/docs/index.html")
 
 	r.Run(":8081")

@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for metrics-api
+# Multi-stage Dockerfile for observability-api
 # Stage 1: Build stage
 FROM golang:1.25.0-alpine AS builder
 
@@ -24,7 +24,7 @@ COPY packages/observability/ ./
 RUN swag init
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o metrics-api .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o observability-api .
 
 # Stage 2: Runtime stage
 FROM alpine:latest
@@ -40,7 +40,7 @@ RUN addgroup -g 1001 -S appgroup && \
 WORKDIR /app
 
 # Copy binary from builder stage
-COPY --from=builder /app/metrics-api .
+COPY --from=builder /app/observability-api .
 
 # Change ownership to non-root user
 RUN chown -R appuser:appgroup /app
@@ -56,4 +56,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8081/health || exit 1
 
 # Run the application
-CMD ["./metrics-api"]
+CMD ["./observability-api"]

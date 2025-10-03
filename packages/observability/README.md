@@ -1,9 +1,16 @@
-# Metrics API
+# Observability API
 
-The **Metrics API** provides basic observability endpoints for services in this portfolio.  
+The **Observability API** provides basic observability endpoints for services in this portfolio.  
 It standardizes health checks, readiness checks, and Prometheus metrics exposure.
 
-The metrics-api provides a minimal baseline (health, readiness, HTTP counters, latency histograms, Go runtime metrics). As additional services are added, domain-specific metrics will be registered where they provide value.
+The observability-api provides a minimal baseline (health, readiness, HTTP counters, latency histograms, Go runtime metrics). As additional services are added, domain-specific metrics will be registered where they provide value.
+
+## Dual Purpose
+
+This package serves two purposes:
+
+1. **Shared Library**: Provides handlers and middleware for other services to use
+2. **Standalone Service**: Runs its own observability API server on port 8081
 
 ## Quick Start
 
@@ -30,15 +37,15 @@ The service is fully containerized and can be deployed as a standalone service:
 
    ```bash
    # From the monorepo root
-   docker build -f packages/observability/Dockerfile -t metrics-api:latest .
+   docker build -f packages/observability/Dockerfile -t observability-api:latest .
    ```
 
-2. **Run the metrics-api container**:
+2. **Run the observability-api container**:
 
    ```bash
-   docker run --name metrics-api \
+   docker run --name observability-api \
      -p 8081:8081 \
-     -d metrics-api:latest
+     -d observability-api:latest
    ```
 
 3. **Verify the service is running**:
@@ -57,14 +64,14 @@ The service is fully containerized and can be deployed as a standalone service:
    curl http://localhost:8081/metrics
    
    # View logs
-   docker logs metrics-api
+   docker logs observability-api
    ```
 
 4. **Stop the service**:
 
    ```bash
-   docker stop metrics-api
-   docker rm metrics-api
+   docker stop observability-api
+   docker rm observability-api
    ```
 
 ## Endpoints
