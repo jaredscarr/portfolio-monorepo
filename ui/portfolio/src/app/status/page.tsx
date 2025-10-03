@@ -56,9 +56,9 @@ export default function StatusPage() {
 
   const [simulationStatus, setSimulationStatus] =
     useState<SimulationStatus | null>(null);
-  const [systemHealth, setSystemHealth] = useState<"healthy" | "down">(
-    "loading" as any
-  );
+  const [systemHealth, setSystemHealth] = useState<
+    "healthy" | "down" | "loading"
+  >("loading");
   const [simulationState, setSimulationState] = useState<
     "normal" | "ready" | "simulating"
   >("normal");
@@ -149,7 +149,7 @@ export default function StatusPage() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [services]);
 
   useEffect(() => {
     setSystemHealth(calculateSystemHealth(services));
@@ -190,7 +190,7 @@ export default function StatusPage() {
 
         {/* System Health & Simulation Status */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardHeader
                 title={
@@ -206,7 +206,7 @@ export default function StatusPage() {
               />
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardHeader
                 title={
@@ -226,7 +226,7 @@ export default function StatusPage() {
 
         <Grid container spacing={3}>
           {/* Service Health */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardHeader title="Service Health" />
               <CardContent>
@@ -271,7 +271,7 @@ export default function StatusPage() {
           </Grid>
 
           {/* Simulation Status */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardHeader title="Simulation Status" />
               <CardContent>

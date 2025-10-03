@@ -49,11 +49,58 @@ Key ideas:
 
 ---
 
-## Planned Services
+## Services
 
-* **metrics-api**: Standardized health checks, readiness, Prometheus metrics, and structured logging.
-* **feature-flags-api**: Append-only feature flag service with Postgres + Redis, exposing CRUD, history, evaluation, and snapshot endpoints.
-* **outbox-api**: Event delivery service using the Outbox pattern, integrating with feature flags for adaptive throttling.
+### Backend Services
+
+* **observability-api** (port 8081): Standardized health checks, readiness, Prometheus metrics, and structured logging. Also provides shared observability handlers for other services.
+* **feature-flags-api** (port 4000): Read-only boolean feature flags served from JSON files for local/prod environments.
+* **outbox-api** (port 8080): Event delivery service using the Outbox pattern, integrating with feature flags for adaptive throttling.
+
+### Frontend
+
+* **portfolio-ui** (port 3000): Next.js React application showcasing the services and providing management interfaces.
+
+### Database
+
+* **postgres** (port 5432): PostgreSQL database for persistent data storage.
+
+## Quick Start
+
+All services are fully containerized and can be run individually or together:
+
+### Individual Service Deployment
+
+Each service can be deployed independently:
+
+```bash
+# Build and run observability-api
+docker build -f packages/observability/Dockerfile -t observability-api:latest .
+docker run --name observability-api -p 8081:8081 -d observability-api:latest
+
+# Build and run feature-flags-api  
+docker build -f apps/feature-flags-api/Dockerfile -t feature-flags-api:latest .
+docker run --name feature-flags-api -p 4000:4000 -d feature-flags-api:latest
+
+# Build and run outbox-api (requires postgres)
+docker run --name postgres -e POSTGRES_DB=outbox -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:15
+docker build -f apps/outbox-api/Dockerfile -t outbox-api:latest .
+docker run --name outbox-api -p 8080:8080 -e DB_HOST=host.docker.internal -e DB_PORT=5432 -e DB_USER=postgres -e DB_PASSWORD=password -e DB_NAME=outbox -e DB_SSLMODE=disable --add-host=host.docker.internal:host-gateway -d outbox-api:latest
+
+# Build and run portfolio-ui
+docker build -f ui/portfolio/Dockerfile -t portfolio-ui:latest .
+docker run --name portfolio-ui -p 3000:3000 -d portfolio-ui:latest
+```
+
+### Full Stack Deployment
+
+Use Docker Compose to run the entire stack:
+
+```bash
+docker-compose up --build -d
+```
+
+This will start all services with proper dependencies and health checks.
 
 ---
 
