@@ -5,6 +5,9 @@ FROM golang:1.25.0-alpine AS builder
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
 
+# Install swag for generating docs
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # Set working directory
 WORKDIR /app
 
@@ -18,6 +21,9 @@ RUN go mod download
 # Copy source code
 COPY apps/outbox-api/ ./
 COPY packages/observability/ ../packages/observability/
+
+# Generate swagger docs
+RUN swag init
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o outbox-api .

@@ -84,56 +84,63 @@ The service will start on port 8080 by default.
 
 ### Docker Deployment (Recommended)
 
-The service is fully containerized and can be run using Docker Compose for easy setup:
+The service is fully containerized and can be deployed as a standalone service:
 
-1. **Start the complete stack**:
+1. **Build the Docker image**:
 
    ```bash
-   cd apps/outbox-api
-   docker-compose up --build -d
+   # From the monorepo root
+   docker build -f apps/outbox-api/Dockerfile -t outbox-api:latest .
    ```
 
-2. **Verify the services are running**:
+2. **Start PostgreSQL** (if not already running):
 
    ```bash
-   docker-compose ps
+   docker run --name postgres-outbox \
+     -e POSTGRES_DB=outbox \
+     -e POSTGRES_USER=postgres \
+     -e POSTGRES_PASSWORD=password \
+     -p 5432:5432 \
+     -d postgres:15
    ```
 
-3. **Check the health endpoint**:
+3. **Run the outbox-api container**:
 
    ```bash
+   docker run --name outbox-api \
+     -p 8080:8080 \
+     -e DB_HOST=host.docker.internal \
+     -e DB_PORT=5432 \
+     -e DB_USER=postgres \
+     -e DB_PASSWORD=password \
+     -e DB_NAME=outbox \
+     -e DB_SSLMODE=disable \
+     -e PORT=8080 \
+     -e WEBHOOK_URL=http://host.docker.internal:3000/api/webhook \
+     --add-host=host.docker.internal:host-gateway \
+     -d outbox-api:latest
+   ```
+
+4. **Verify the service is running**:
+
+   ```bash
+   # Check container status
+   docker ps
+   
+   # Test health endpoint
    curl http://localhost:8080/health
-   ```
-
-4. **View logs**:
-
-   ```bash
-   docker-compose logs -f outbox-api
+   
+   # View logs
+   docker logs outbox-api
    ```
 
 5. **Stop the services**:
 
    ```bash
-   docker-compose down
+   docker stop outbox-api postgres-outbox
+   docker rm outbox-api postgres-outbox
    ```
 
-#### Docker Services
-
-The `docker-compose.yml` includes:
-
-- **outbox-api**: The main application service
-- **postgres**: PostgreSQL 15 database
-- **Automatic health checks**: Services wait for dependencies to be healthy
-- **Environment configuration**: Database connection automatically configured
-
-#### Building the Docker Image
-
-To build the Docker image manually:
-
-```bash
-# From the monorepo root
-docker build -f apps/outbox-api/Dockerfile -t outbox-api:latest .
-```
 
 #### Environment Configuration
 
