@@ -24,7 +24,7 @@ export default function Home() {
             JARED SCARR
           </Typography>
           <Typography variant="h5" color="text.secondary" sx={{ mb: 6 }}>
-            Software Engineer, Full Stack, & Aspiring Architect
+            Full Stack Software Engineer
           </Typography>
           <Box
             sx={{
@@ -36,9 +36,6 @@ export default function Home() {
           >
             <Button variant="contained" color="primary" href="/case-studies">
               View Case Studies
-            </Button>
-            <Button variant="outlined" color="secondary" href="/about">
-              About Me
             </Button>
           </Box>
         </Box>

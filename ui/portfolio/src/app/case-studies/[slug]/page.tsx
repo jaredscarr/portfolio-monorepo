@@ -27,10 +27,11 @@ const caseStudyData: Record<
     technologies: ["Go", "PostgreSQL", "Event Sourcing", "Docker"],
     status: "Completed",
     overview: `
-      The transactional outbox pattern is a reliable way to publish events in distributed systems 
-      while maintaining data consistency. This implementation demonstrates how to ensure that 
-      database changes and event publishing happen atomically, preventing data inconsistencies 
-      that can occur when external systems are unavailable.
+      The transactional outbox pattern provides a reliable way to publish events to external systems 
+      by storing them in a database table within the same transaction as your business data. A 
+      separate process then reads these events and publishes them with built-in retry mechanisms, 
+      achieving eventual consistency without complex compensating transactions. This approach trades 
+      real-time guarantees for reliability—events are guaranteed to be delivered, but with some delay.
     `,
     keyFeatures: [
       "Atomic database transactions with event storage",
@@ -46,12 +47,12 @@ const caseStudyData: Record<
       "Monitoring and alerting for event processing delays",
     ],
     learnings: [
-      "Deep understanding of distributed system challenges",
       "Event-driven architecture patterns",
       "Database transaction management",
       "System observability and monitoring",
     ],
-    repositoryUrl: "https://github.com/yourusername/outbox-api",
+    repositoryUrl:
+      "https://github.com/jaredscarr/portfolio-monorepo/tree/main/apps/outbox-api",
     docsUrl: "http://localhost:8080/swagger/index.html",
     liveApiUrl: "/outbox",
   },
@@ -63,29 +64,25 @@ const caseStudyData: Record<
     status: "In Progress",
     overview: `
       A flexible feature flags service that allows for dynamic feature toggling without 
-      code deployments. Supports percentage-based rollouts, user targeting, and A/B testing 
-      scenarios for controlled feature releases.
+      code deployments.
     `,
     keyFeatures: [
       "Dynamic feature flag configuration",
-      "Percentage-based feature rollouts",
-      "User and group targeting",
       "RESTful API with comprehensive documentation",
       "Environment-specific configurations",
     ],
     challenges: [
       "Designing a flexible configuration schema",
-      "Implementing efficient flag evaluation",
       "Ensuring high availability and low latency",
       "Managing configuration changes safely",
     ],
     learnings: [
       "API design principles",
       "Configuration management strategies",
-      "Performance optimization techniques",
       "Documentation and API usability",
     ],
-    repositoryUrl: "https://github.com/yourusername/feature-flags-api",
+    repositoryUrl:
+      "https://github.com/jaredscarr/portfolio-monorepo/tree/main/apps/feature-flags-api",
     docsUrl: "http://localhost:4000/swagger/index.html",
     liveApiUrl: "http://localhost:4000",
   },
@@ -122,9 +119,10 @@ const caseStudyData: Record<
       "API documentation with Swagger/OpenAPI standards",
       "Go runtime monitoring and performance analysis",
     ],
-    repositoryUrl: "https://github.com/yourusername/observability",
+    repositoryUrl:
+      "https://github.com/jaredscarr/portfolio-monorepo/tree/main/packages/observability",
     docsUrl: "http://localhost:8081/docs/index.html",
-    liveApiUrl: "http://localhost:8081",
+    liveApiUrl: "/status",
   },
 };
 
@@ -167,15 +165,20 @@ export default async function CaseStudyDetail({ params }: PageProps) {
             {study.title}
           </Typography>
 
-          <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
-            <Chip
-              label={`Status: ${study.status}`}
-              color="primary"
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Button variant="contained" href={study.liveApiUrl} target="_blank">
+              Live API
+            </Button>
+            <Button variant="outlined" href={study.docsUrl} target="_blank">
+              Swagger Docs
+            </Button>
+            <Button
               variant="outlined"
-            />
-            {study.technologies.map((tech: string) => (
-              <Chip key={tech} label={tech} variant="outlined" />
-            ))}
+              href={study.repositoryUrl}
+              target="_blank"
+            >
+              View Repository
+            </Button>
           </Box>
 
           <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
@@ -222,20 +225,15 @@ export default async function CaseStudyDetail({ params }: PageProps) {
             ))}
           </Box>
 
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 4 }}>
-            <Button
-              variant="contained"
-              href={study.repositoryUrl}
-              target="_blank"
-            >
-              View Repository
-            </Button>
-            <Button variant="outlined" href={study.docsUrl} target="_blank">
-              Swagger Docs
-            </Button>
-            <Button variant="outlined" href={study.liveApiUrl} target="_blank">
-              Live API
-            </Button>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 4 }}>
+            <Chip
+              label={`Status: ${study.status}`}
+              color="primary"
+              variant="outlined"
+            />
+            {study.technologies.map((tech: string) => (
+              <Chip key={tech} label={tech} variant="outlined" />
+            ))}
           </Box>
         </Box>
       </Container>

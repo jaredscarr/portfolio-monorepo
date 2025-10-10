@@ -45,7 +45,7 @@ Key ideas:
 * **Heavily throttled & debounced APIs** — shaping traffic before it overwhelms the system.
 * **Self-protecting services** — rate limits, concurrency caps, circuit breakers, and backpressure.
 * **Resilience first** — prefer rejecting quickly over failing unpredictably.
-* **Minimal cost footprint** — t3.micro instance with Docker Compose, Postgres, and Redis.
+* **Minimal cost footprint** — t3.micro instance with Docker Compose and Postgres.
 
 ---
 

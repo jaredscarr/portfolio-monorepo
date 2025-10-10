@@ -27,7 +27,6 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const navigationItems = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Outbox Events", href: "/outbox" },
   { label: "Status", href: "/status" },
