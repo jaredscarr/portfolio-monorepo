@@ -29,6 +29,7 @@ const navigationItems = [
   { label: "Home", href: "/" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Outbox Events", href: "/outbox" },
+  { label: "Feature Flags", href: "/feature-flags" },
   { label: "Status", href: "/status" },
 ];
 

@@ -61,7 +61,7 @@ const caseStudyData: Record<
     description:
       "A lightweight feature flags service with dynamic configuration and A/B testing capabilities.",
     technologies: ["Go", "JSON Config", "REST API", "Swagger"],
-    status: "In Progress",
+    status: "Completed",
     overview: `
       A flexible feature flags service that allows for dynamic feature toggling without 
       code deployments.
@@ -84,7 +84,7 @@ const caseStudyData: Record<
     repositoryUrl:
       "https://github.com/jaredscarr/portfolio-monorepo/tree/main/apps/feature-flags-api",
     docsUrl: "http://localhost:4000/swagger/index.html",
-    liveApiUrl: "http://localhost:4000",
+    liveApiUrl: "/feature-flags",
   },
   observability: {
     title: "Observability",

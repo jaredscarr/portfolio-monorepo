@@ -97,7 +97,7 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_OUTBOX_API_URL: http://outbox-api:8080
-      NEXT_PUBLIC_FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
+      FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
       NEXT_PUBLIC_OBSERVABILITY_API_URL: http://observability-api:8081
     depends_on:
       outbox-api:

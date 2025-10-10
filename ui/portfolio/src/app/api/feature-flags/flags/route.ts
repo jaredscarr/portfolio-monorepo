@@ -3,31 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 const FEATURE_FLAGS_API_URL =
   process.env.FEATURE_FLAGS_API_URL || "http://localhost:4000";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ key: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { key } = await params;
     const searchParams = request.nextUrl.searchParams;
     const env = searchParams.get("env") || "local";
-    const body = await request.json();
 
-    const response = await fetch(
-      `${FEATURE_FLAGS_API_URL}/admin/flags/${key}?env=${env}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await fetch(`${FEATURE_FLAGS_API_URL}/flags?env=${env}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
       return NextResponse.json(
-        { error: errorData.error || "Failed to update flag" },
+        { error: errorData.error || "Failed to fetch flags" },
         { status: response.status }
       );
     }
@@ -35,7 +26,7 @@ export async function PUT(
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error updating flag:", error);
+    console.error("Error fetching flags:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
