@@ -39,17 +39,17 @@ export default function StatusPage() {
   const [services, setServices] = useState<ServiceHealth[]>([
     {
       name: "Outbox API",
-      url: "http://localhost:8080/health",
+      url: "/api/outbox/health",
       status: "loading",
     },
     {
       name: "Feature Flags API",
-      url: "http://localhost:4000/health",
+      url: "/api/feature-flags/health",
       status: "loading",
     },
     {
       name: "Observability",
-      url: "http://localhost:8081/health",
+      url: "/api/observability/health",
       status: "loading",
     },
   ]);
