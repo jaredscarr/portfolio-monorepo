@@ -45,8 +45,8 @@ func main() {
 	store := storage.NewOutboxStore(db)
 
 	// Initialize feature flag client and simulation gates
-	flagsClient := gates.NewHTTPFeatureFlagClient("http://localhost:4000")
-	simulationGates := gates.NewSimulationGates(flagsClient, "local")
+	flagsClient := gates.NewHTTPFeatureFlagClient(cfg.FeatureFlags.BaseURL)
+	simulationGates := gates.NewSimulationGates(flagsClient, cfg.FeatureFlags.Environment)
 
 	// Initialize handlers
 	h := handlers.New(store, cfg, simulationGates)

@@ -5,6 +5,7 @@
 The outbox-api service uses environment variables for configuration. Here are the available options:
 
 ### Database Configuration
+
 - `DB_HOST` - Database host (default: localhost)
 - `DB_PORT` - Database port (default: 5432)
 - `DB_USER` - Database username (default: postgres)
@@ -13,14 +14,22 @@ The outbox-api service uses environment variables for configuration. Here are th
 - `DB_SSLMODE` - SSL mode (default: disable)
 
 ### Server Configuration
+
 - `PORT` - Server port (default: 8080)
 - `READ_TIMEOUT` - Read timeout (default: 30s)
 - `WRITE_TIMEOUT` - Write timeout (default: 30s)
 
 ### Webhook Configuration
-- `WEBHOOK_URL` - Webhook endpoint URL (default: http://localhost:3000/webhook)
+
+- `WEBHOOK_URL` - Webhook endpoint URL (default: <http://localhost:3000/webhook>)
+
+### Feature Flags Configuration
+
+- `FEATURE_FLAGS_API_URL` - Feature flag service base URL (default: <http://localhost:4000>)
+- `FEATURE_FLAGS_ENV` - Feature flag environment key to request (default: local)
 
 ### Publishing Configuration (Optional)
+
 - `BATCH_SIZE` - Batch size for publishing (default: 10)
 - `BATCH_TIMEOUT` - Batch timeout (default: 5s)
 - `RETRY_ATTEMPTS` - Number of retry attempts (default: 3)
@@ -28,11 +37,13 @@ The outbox-api service uses environment variables for configuration. Here are th
 - `MAX_RETRY_DELAY` - Maximum retry delay (default: 30s)
 
 ### Circuit Breaker Configuration (Optional)
+
 - `CIRCUIT_MAX_REQUESTS` - Maximum requests before circuit opens (default: 5)
 - `CIRCUIT_INTERVAL` - Circuit breaker interval (default: 10s)
 - `CIRCUIT_TIMEOUT` - Circuit breaker timeout (default: 5s)
 
 ### Development Settings
+
 - `GIN_MODE` - Gin mode (debug/release, default: debug)
 
 ## Docker Compose Environment
@@ -49,6 +60,8 @@ environment:
   DB_SSLMODE: disable
   PORT: 8080
   WEBHOOK_URL: http://host.docker.internal:3000/webhook
+  FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
+  FEATURE_FLAGS_ENV: prod
 ```
 
 ## Local Development
@@ -65,6 +78,9 @@ DB_NAME=outbox
 DB_SSLMODE=disable
 PORT=8080
 WEBHOOK_URL=http://localhost:3000/webhook
+# Optional overrides
+# FEATURE_FLAGS_API_URL=http://localhost:4000
+# FEATURE_FLAGS_ENV=local
 ```
 
 ## Production Deployment
@@ -76,4 +92,6 @@ export DB_PASSWORD="your_secure_password"
 export DB_USER="your_db_user"
 export DB_HOST="your_db_host"
 export WEBHOOK_URL="https://your-secure-webhook.com/endpoint"
+export FEATURE_FLAGS_API_URL="https://feature-flags.your-domain.com"
+export FEATURE_FLAGS_ENV="prod"
 ```

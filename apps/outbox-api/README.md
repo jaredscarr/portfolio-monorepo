@@ -165,6 +165,8 @@ WEBHOOK_URL=http://localhost:3000/webhook
 
 # Optional overrides
 BATCH_SIZE=10
+FEATURE_FLAGS_API_URL=http://localhost:4000
+FEATURE_FLAGS_ENV=local
 ```
 
 
@@ -182,6 +184,8 @@ BATCH_SIZE=10
 | `DB_SSLMODE` | SSL mode | `disable` |
 | `WEBHOOK_URL` | Webhook endpoint URL | `http://localhost:3000/webhook` |
 | `BATCH_SIZE` | Batch size for publishing | `10` |
+| `FEATURE_FLAGS_API_URL` | Feature flag service base URL | `http://localhost:4000` |
+| `FEATURE_FLAGS_ENV` | Feature flag environment key | `local` |
 
 ### Production Security
 
@@ -192,6 +196,8 @@ export DB_PASSWORD="your_secure_password"
 export DB_USER="your_db_user"
 export DB_HOST="your_db_host"
 export WEBHOOK_URL="https://your-secure-webhook.com/endpoint"
+export FEATURE_FLAGS_API_URL="https://feature-flags.your-domain.com"
+export FEATURE_FLAGS_ENV="prod"
 ```
 
 This prevents sensitive data from being stored in configuration files that might be committed to version control.

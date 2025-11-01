@@ -54,9 +54,22 @@ func (m *MockSimulationGates) ShouldUseCircuitBreakerDemo() bool {
 	return args.Bool(0)
 }
 
-func (m *MockSimulationGates) GetSimulationStatus() map[string]bool {
+func (m *MockSimulationGates) CheckCircuitBreaker() bool {
 	args := m.Called()
-	return args.Get(0).(map[string]bool)
+	return args.Bool(0)
+}
+
+func (m *MockSimulationGates) RecordCircuitBreakerSuccess() {
+	m.Called()
+}
+
+func (m *MockSimulationGates) RecordCircuitBreakerFailure() {
+	m.Called()
+}
+
+func (m *MockSimulationGates) GetSimulationStatus() map[string]interface{} {
+	args := m.Called()
+	return args.Get(0).(map[string]interface{})
 }
 
 func (m *MockOutboxStore) CreateEvent(req *models.CreateEventRequest) (*models.Event, error) {
@@ -121,6 +134,9 @@ func setupTestRouter(store *MockOutboxStore) *gin.Engine {
 	mockGates.On("ShouldSimulateNetworkDelays").Return(false)
 	mockGates.On("ShouldUsePartialFailureMode").Return(false)
 	mockGates.On("ShouldUseCircuitBreakerDemo").Return(false)
+	mockGates.On("CheckCircuitBreaker").Return(false)
+	mockGates.On("RecordCircuitBreakerFailure").Return()
+	mockGates.On("RecordCircuitBreakerSuccess").Return()
 	h := New(store, cfg, mockGates)
 
 	api := router.Group("/api/v1")
@@ -740,7 +756,7 @@ func TestHandler_PublishEvents(t *testing.T) {
 			expectedStatus: http.StatusOK, // HTTP errors are handled gracefully
 		},
 		{
-			name: "use default batch size when not provided",
+			name:        "use default batch size when not provided",
 			requestBody: models.PublishRequest{}, // Empty request
 			mockSetup: func(mockStore *MockOutboxStore) {
 				mockStore.On("GetPendingEvents", 10).Return([]models.Event{}, nil) // Default batch size is 10
@@ -773,6 +789,9 @@ func TestHandler_PublishEvents(t *testing.T) {
 			mockGates.On("ShouldSimulateNetworkDelays").Return(false)
 			mockGates.On("ShouldUsePartialFailureMode").Return(false)
 			mockGates.On("ShouldUseCircuitBreakerDemo").Return(false)
+			mockGates.On("CheckCircuitBreaker").Return(false)
+			mockGates.On("RecordCircuitBreakerFailure").Return()
+			mockGates.On("RecordCircuitBreakerSuccess").Return()
 			h := New(mockStore, cfg, mockGates)
 
 			admin := router.Group("/admin")

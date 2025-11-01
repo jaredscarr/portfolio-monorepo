@@ -10,10 +10,11 @@ import (
 
 // Config holds all configuration for the outbox-api service
 type Config struct {
-	Server   ServerConfig   `json:"server"`
-	Database DatabaseConfig `json:"database"`
-	Publish  PublishConfig  `json:"publish"`
-	Circuit  CircuitConfig  `json:"circuit"`
+	Server       ServerConfig       `json:"server"`
+	Database     DatabaseConfig     `json:"database"`
+	Publish      PublishConfig      `json:"publish"`
+	Circuit      CircuitConfig      `json:"circuit"`
+	FeatureFlags FeatureFlagsConfig `json:"feature_flags"`
 }
 
 // ServerConfig holds server-specific configuration
@@ -50,6 +51,12 @@ type CircuitConfig struct {
 	Timeout     string `json:"timeout"`
 }
 
+// FeatureFlagsConfig holds feature flag service configuration
+type FeatureFlagsConfig struct {
+	BaseURL     string `json:"base_url"`
+	Environment string `json:"environment"`
+}
+
 // Load loads configuration from .env file and environment variables
 func Load() (*Config, error) {
 	cfg := &Config{
@@ -78,6 +85,10 @@ func Load() (*Config, error) {
 			MaxRequests: 5,
 			Interval:    "10s",
 			Timeout:     "5s",
+		},
+		FeatureFlags: FeatureFlagsConfig{
+			BaseURL:     "http://localhost:4000",
+			Environment: "local",
 		},
 	}
 
@@ -156,6 +167,13 @@ func loadFromEnv(cfg *Config) {
 		if bs, err := strconv.Atoi(batchSize); err == nil {
 			cfg.Publish.BatchSize = bs
 		}
+	}
+
+	if flagsURL := os.Getenv("FEATURE_FLAGS_API_URL"); flagsURL != "" {
+		cfg.FeatureFlags.BaseURL = flagsURL
+	}
+	if flagsEnv := os.Getenv("FEATURE_FLAGS_ENV"); flagsEnv != "" {
+		cfg.FeatureFlags.Environment = flagsEnv
 	}
 }
 

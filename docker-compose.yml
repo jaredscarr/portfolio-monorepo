@@ -49,6 +49,8 @@ services:
       DB_SSLMODE: disable
       PORT: 8080
       WEBHOOK_URL: http://portfolio:3000/api/webhook
+      FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
+      FEATURE_FLAGS_ENV: prod
     depends_on:
       postgres:
         condition: service_healthy

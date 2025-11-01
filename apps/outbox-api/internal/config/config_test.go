@@ -44,20 +44,26 @@ func TestLoad(t *testing.T) {
 					Interval:    "10s",
 					Timeout:     "5s",
 				},
+				FeatureFlags: FeatureFlagsConfig{
+					BaseURL:     "http://localhost:4000",
+					Environment: "local",
+				},
 			},
 		},
 		{
 			name: "environment variable overrides",
 			envVars: map[string]string{
-				"PORT":        "9090",
-				"DB_HOST":     "prod-db",
-				"DB_PORT":     "5433",
-				"DB_USER":     "admin",
-				"DB_PASSWORD": "secret",
-				"DB_NAME":     "production",
-				"DB_SSLMODE":  "require",
-				"WEBHOOK_URL": "https://api.example.com/webhook",
-				"BATCH_SIZE":  "20",
+				"PORT":                  "9090",
+				"DB_HOST":               "prod-db",
+				"DB_PORT":               "5433",
+				"DB_USER":               "admin",
+				"DB_PASSWORD":           "secret",
+				"DB_NAME":               "production",
+				"DB_SSLMODE":            "require",
+				"WEBHOOK_URL":           "https://api.example.com/webhook",
+				"BATCH_SIZE":            "20",
+				"FEATURE_FLAGS_API_URL": "https://flags.example.com",
+				"FEATURE_FLAGS_ENV":     "prod",
 			},
 			expected: &Config{
 				Server: ServerConfig{
@@ -85,6 +91,10 @@ func TestLoad(t *testing.T) {
 					MaxRequests: 5,
 					Interval:    "10s",
 					Timeout:     "5s",
+				},
+				FeatureFlags: FeatureFlagsConfig{
+					BaseURL:     "https://flags.example.com",
+					Environment: "prod",
 				},
 			},
 		},
@@ -187,11 +197,11 @@ func TestLoadFromFile_DISABLED(t *testing.T) {
 	// Test loading from file
 	err = loadFromEnvFile("test-config.json")
 	require.NoError(t, err)
-	
+
 	// Load config again to pick up the env vars
 	cfg, err := Load()
 	require.NoError(t, err)
-	
+
 	// Clean up environment variables after test
 	defer func() {
 		os.Unsetenv("PORT")
