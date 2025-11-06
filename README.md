@@ -131,3 +131,17 @@ docker-compose down
 * **Application safeguards:** Concurrency limiter, timeouts, and circuit breakers.
 * **Adaptive load shedding:** Services dynamically adjust worker batch sizes, rate limits, or concurrency caps based on health metrics.
 * **Maintenance mode:** Services can be switched to low-power survival mode automatically or manually.
+
+---
+
+## AWS Deployment
+
+For production deployment on AWS EC2, see [DEPLOYMENT.md](DEPLOYMENT.md) for complete instructions including:
+
+* DNS configuration
+* Security group setup
+* TLS/SSL certificate management (automatic via Caddy and Let's Encrypt)
+* Deployment steps
+* Troubleshooting guide
+
+The deployment uses Caddy as a reverse proxy with automatic HTTPS certificate provisioning.

@@ -1,13 +1,20 @@
 # Caddyfile for Portfolio Monorepo
-# Replace 'your-domain.com' with your actual domain
+# This file uses placeholders that will be replaced by deploy.sh
+# Placeholders: {{DOMAIN}}, {{EMAIL}}
+#
+# For local development:
+# - Replace {{DOMAIN}} with localhost or a local domain (e.g., local.portfolio.test)
+# - Replace {{EMAIL}} with your email address
+# - Or use direct service ports: http://localhost:3000, http://localhost:8080, etc.
 
 {
     # Global options
-    auto_https off
+    email {{EMAIL}}
+    auto_https on
 }
 
 # Main portfolio UI
-jaredscarr.com {
+{{DOMAIN}} {
     reverse_proxy portfolio:3000
     
     # Health check endpoint
@@ -23,7 +30,7 @@ jaredscarr.com {
 }
 
 # API endpoints with subdomains
-api.jaredscarr.com {
+api.{{DOMAIN}} {
     # Route to different services based on path
     handle /outbox/* {
         reverse_proxy outbox-api:8080
@@ -49,23 +56,23 @@ api.jaredscarr.com {
 }
 
 # Direct service access (for development/admin)
-outbox.jaredscarr.com {
+outbox.{{DOMAIN}} {
     reverse_proxy outbox-api:8080
 }
 
-flags.jaredscarr.com {
+flags.{{DOMAIN}} {
     reverse_proxy feature-flags-api:4000
 }
 
-metrics.jaredscarr.com {
+metrics.{{DOMAIN}} {
     reverse_proxy observability-api:8081
 }
 
 # Redirect HTTP to HTTPS
-http://jaredscarr.com {
-    redir https://jaredscarr.com{uri} permanent
+http://{{DOMAIN}} {
+    redir https://{{DOMAIN}}{uri} permanent
 }
 
-http://api.jaredscarr.com {
-    redir https://api.jaredscarr.com{uri} permanent
+http://api.{{DOMAIN}} {
+    redir https://api.{{DOMAIN}}{uri} permanent
 }

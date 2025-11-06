@@ -43,18 +43,29 @@ cd portfolio-monorepo
 # Set up environment
 echo "⚙️ Setting up environment..."
 if [ ! -f ".env.production" ]; then
-    echo "❌ Please create .env.production file from env.production.template"
-    echo "   Update domain and email values before continuing"
-    exit 1
+    echo "⚠️  .env.production not found"
+    echo "   Creating from template (you should review and update values)..."
+    if [ -f "env.production.template" ]; then
+        cp env.production.template .env.production
+        echo "   Created .env.production from template"
+        echo "   ⚠️  IMPORTANT: Review .env.production and update all placeholder values"
+        echo "   ⚠️  Change DB_PASSWORD and other secrets before deploying!"
+        read -p "   Press Enter to continue after reviewing .env.production..."
+    else
+        echo "❌ env.production.template not found"
+        echo "   Please create .env.production manually with required environment variables"
+        exit 1
+    fi
 fi
 
 # Update Caddyfile with your domain
 echo "🌐 Updating Caddyfile..."
-read -p "Enter your domain name: " DOMAIN
-read -p "Enter your email for SSL: " EMAIL
+read -p "Enter your domain name (e.g., example.com): " DOMAIN
+read -p "Enter your email for SSL certificates: " EMAIL
 
-sed -i "s/your-domain.com/$DOMAIN/g" Caddyfile
-sed -i "s/your-email@example.com/$EMAIL/g" Caddyfile
+# Replace placeholders in Caddyfile
+sed -i "s/{{DOMAIN}}/$DOMAIN/g" Caddyfile
+sed -i "s/{{EMAIL}}/$EMAIL/g" Caddyfile
 
 # Start services
 echo "🚀 Starting services..."
