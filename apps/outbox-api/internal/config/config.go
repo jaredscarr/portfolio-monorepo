@@ -19,9 +19,10 @@ type Config struct {
 
 // ServerConfig holds server-specific configuration
 type ServerConfig struct {
-	Port         string `json:"port"`
-	ReadTimeout  string `json:"read_timeout"`
-	WriteTimeout string `json:"write_timeout"`
+	Port         string   `json:"port"`
+	ReadTimeout  string   `json:"read_timeout"`
+	WriteTimeout string   `json:"write_timeout"`
+	CORSOrigins  []string `json:"cors_origins"`
 }
 
 // DatabaseConfig holds database connection configuration
@@ -64,6 +65,7 @@ func Load() (*Config, error) {
 			Port:         "8080",
 			ReadTimeout:  "30s",
 			WriteTimeout: "30s",
+			CORSOrigins:  []string{"http://localhost:3000", "http://portfolio:3000"},
 		},
 		Database: DatabaseConfig{
 			Host:     "localhost",
@@ -174,6 +176,18 @@ func loadFromEnv(cfg *Config) {
 	}
 	if flagsEnv := os.Getenv("FEATURE_FLAGS_ENV"); flagsEnv != "" {
 		cfg.FeatureFlags.Environment = flagsEnv
+	}
+
+	if corsOrigins := os.Getenv("CORS_ALLOWED_ORIGINS"); corsOrigins != "" {
+		// Parse comma-separated origins
+		origins := strings.Split(corsOrigins, ",")
+		cfg.Server.CORSOrigins = make([]string, 0, len(origins))
+		for _, origin := range origins {
+			trimmed := strings.TrimSpace(origin)
+			if trimmed != "" {
+				cfg.Server.CORSOrigins = append(cfg.Server.CORSOrigins, trimmed)
+			}
+		}
 	}
 }
 

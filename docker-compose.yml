@@ -51,6 +51,7 @@ services:
       WEBHOOK_URL: http://portfolio:3000/api/webhook
       FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
       FEATURE_FLAGS_ENV: prod
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://portfolio:3000,https://jaredscarr.com
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,6 +83,8 @@ services:
     container_name: portfolio-feature-flags-api
     ports:
       - "4000:4000"
+    environment:
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://portfolio:3000,https://jaredscarr.com
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
       interval: 30s

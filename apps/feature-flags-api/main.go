@@ -1,14 +1,10 @@
-// @title       Feature Flags API
-// @version     1.0.0
-// @description Read-only boolean feature flags served from repo JSON (local/prod).
-// @BasePath    /
-// @schemes     http
-// @produce     json
 package main
 
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -20,6 +16,33 @@ import (
 	"github.com/jared-scarr/portfolio-monorepo/apps/feature-flags-api/handlers"
 	observability "github.com/jared-scarr/portfolio-monorepo/packages/observability/handlers"
 )
+
+// @title       Feature Flags API
+// @version     1.0.0
+// @description Read-only boolean feature flags served from repo JSON (local/prod).
+// @BasePath    /
+// @schemes     http
+// @produce     json
+
+// getCORSOrigins returns the list of allowed CORS origins from environment variable or defaults
+func getCORSOrigins() []string {
+	defaultOrigins := []string{"http://localhost:3000", "http://portfolio:3000"}
+
+	if corsOrigins := os.Getenv("CORS_ALLOWED_ORIGINS"); corsOrigins != "" {
+		// Parse comma-separated origins
+		origins := strings.Split(corsOrigins, ",")
+		result := make([]string, 0, len(origins))
+		for _, origin := range origins {
+			trimmed := strings.TrimSpace(origin)
+			if trimmed != "" {
+				result = append(result, trimmed)
+			}
+		}
+		return result
+	}
+
+	return defaultOrigins
+}
 
 func main() {
 	if err := flags.LoadFlagsFromDisk("local"); err != nil {
@@ -40,7 +63,7 @@ func main() {
 
 	// Add CORS middleware
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://portfolio:3000"},
+		AllowOrigins:     getCORSOrigins(),
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

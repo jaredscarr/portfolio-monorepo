@@ -18,6 +18,7 @@ The outbox-api service uses environment variables for configuration. Here are th
 - `PORT` - Server port (default: 8080)
 - `READ_TIMEOUT` - Read timeout (default: 30s)
 - `WRITE_TIMEOUT` - Write timeout (default: 30s)
+- `CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (default: `http://localhost:3000,http://portfolio:3000`)
 
 ### Webhook Configuration
 
@@ -62,6 +63,7 @@ environment:
   WEBHOOK_URL: http://host.docker.internal:3000/webhook
   FEATURE_FLAGS_API_URL: http://feature-flags-api:4000
   FEATURE_FLAGS_ENV: prod
+  CORS_ALLOWED_ORIGINS: http://localhost:3000,http://portfolio:3000,https://jaredscarr.com
 ```
 
 ## Local Development

@@ -22,6 +22,7 @@ func TestLoad(t *testing.T) {
 					Port:         "8080",
 					ReadTimeout:  "30s",
 					WriteTimeout: "30s",
+					CORSOrigins:  []string{"http://localhost:3000", "http://portfolio:3000"},
 				},
 				Database: DatabaseConfig{
 					Host:     "localhost",
@@ -64,12 +65,14 @@ func TestLoad(t *testing.T) {
 				"BATCH_SIZE":            "20",
 				"FEATURE_FLAGS_API_URL": "https://flags.example.com",
 				"FEATURE_FLAGS_ENV":     "prod",
+				"CORS_ALLOWED_ORIGINS":  "https://example.com, https://api.example.com",
 			},
 			expected: &Config{
 				Server: ServerConfig{
 					Port:         "9090",
 					ReadTimeout:  "30s",
 					WriteTimeout: "30s",
+					CORSOrigins:  []string{"https://example.com", "https://api.example.com"},
 				},
 				Database: DatabaseConfig{
 					Host:     "prod-db",
