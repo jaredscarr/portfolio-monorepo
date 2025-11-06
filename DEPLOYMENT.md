@@ -9,6 +9,27 @@ This guide covers the complete deployment process for the Portfolio Monorepo on 
 - SSH access to EC2 instance
 - Ports 80 (HTTP) and 443 (HTTPS) open in security group
 
+### Supported Operating Systems
+
+The deployment script automatically detects and supports:
+- **Amazon Linux 2023** (recommended) - Uses `dnf` package manager
+- **Amazon Linux 2** - Uses `yum` package manager  
+- **Ubuntu 22.04 LTS or later** - Uses `apt` package manager
+
+**Recommended AMI:** When launching your EC2 instance, choose:
+- Amazon Linux 2023 AMI (most recent, best support)
+- Or Ubuntu Server 22.04 LTS AMI
+
+The script will automatically detect the OS and use the appropriate package manager.
+
+### Docker and Docker Compose
+
+The deployment script automatically installs:
+- **Docker** - Container runtime (installed via official Docker install script)
+- **Docker Compose** - Legacy binary (`docker-compose` command)
+
+**Note:** The script uses the legacy `docker-compose` binary (with hyphen) rather than the newer Docker Compose plugin (`docker compose` without hyphen). This ensures compatibility with the existing `docker-compose.yml` file and commands used throughout the documentation.
+
 ## DNS Configuration
 
 Before deploying, configure the following DNS records to point to your EC2 instance's public IP:

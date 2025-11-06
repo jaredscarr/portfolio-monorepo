@@ -2,14 +2,38 @@
 
 # Portfolio Monorepo AWS EC2 Deployment Script
 # Run this script on your EC2 instance
+# Supports: Amazon Linux 2023, Amazon Linux 2, Ubuntu
 
 set -e
 
 echo "🚀 Starting Portfolio Monorepo Deployment..."
 
-# Update system
+# Detect OS and package manager
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    echo "❌ Cannot detect OS. This script requires Amazon Linux or Ubuntu."
+    exit 1
+fi
+
+echo "📋 Detected OS: $OS"
+
+# Update system packages based on OS
 echo "📦 Updating system packages..."
-sudo apt update && sudo apt upgrade -y
+if [[ "$OS" == "amzn" ]] || [[ "$OS" == "amazon" ]]; then
+    # Amazon Linux 2023 uses dnf, Amazon Linux 2 uses yum
+    if command -v dnf &> /dev/null; then
+        sudo dnf update -y
+    else
+        sudo yum update -y
+    fi
+elif [[ "$OS" == "ubuntu" ]] || [[ "$OS" == "debian" ]]; then
+    sudo apt update && sudo apt upgrade -y
+else
+    echo "⚠️  Unsupported OS: $OS. Attempting generic package update..."
+    echo "   This script is tested on Amazon Linux and Ubuntu."
+fi
 
 # Install Docker
 echo "🐳 Installing Docker..."
@@ -18,6 +42,20 @@ if ! command -v docker &> /dev/null; then
     sudo sh get-docker.sh
     sudo usermod -aG docker $USER
     rm get-docker.sh
+fi
+
+# Install git if not present (required for cloning repo)
+if ! command -v git &> /dev/null; then
+    echo "📥 Installing git..."
+    if [[ "$OS" == "amzn" ]] || [[ "$OS" == "amazon" ]]; then
+        if command -v dnf &> /dev/null; then
+            sudo dnf install -y git
+        else
+            sudo yum install -y git
+        fi
+    elif [[ "$OS" == "ubuntu" ]] || [[ "$OS" == "debian" ]]; then
+        sudo apt install -y git
+    fi
 fi
 
 # Install Docker Compose
