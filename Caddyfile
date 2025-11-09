@@ -60,7 +60,7 @@ outbox.{{DOMAIN}} {
     reverse_proxy outbox-api:8080
 }
 
-flags.{{DOMAIN}} {
+feature-flags.{{DOMAIN}} {
     reverse_proxy feature-flags-api:4000
 }
 
