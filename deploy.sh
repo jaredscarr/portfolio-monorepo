@@ -84,7 +84,11 @@ cd /opt/portfolio
 # Clone repository (replace with your actual repo URL)
 echo "📥 Cloning repository..."
 if [ ! -d "portfolio-monorepo" ]; then
-    git clone https://github.com/jared-scarr/portfolio-monorepo.git
+    if git ls-remote git@github.com:jared-scarr/portfolio-monorepo.git &> /dev/null; then
+        git clone git@github.com:jared-scarr/portfolio-monorepo.git
+    else
+        git clone https://github.com/jared-scarr/portfolio-monorepo.git
+    fi
 fi
 cd portfolio-monorepo
 
