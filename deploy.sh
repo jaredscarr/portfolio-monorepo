@@ -6,6 +6,8 @@
 
 set -e
 
+SCRIPT_ROOT="$(cd "$(dirname "$0")" && pwd)"
+
 echo "🚀 Starting Portfolio Monorepo Deployment..."
 
 # Detect OS and package manager
@@ -75,6 +77,16 @@ if ! command -v docker-compose &> /dev/null; then
     sudo chmod +x /usr/local/bin/docker-compose
 fi
 
+# Ensure rsync is available (used to copy repository)
+if ! command -v rsync &> /dev/null; then
+    echo "📦 Installing rsync..."
+    if [[ "$OS" == "amzn" ]] || [[ "$OS" == "amazon" ]]; then
+        sudo dnf install -y rsync
+    elif [[ "$OS" == "ubuntu" ]] || [[ "$OS" == "debian" ]]; then
+        sudo apt install -y rsync
+    fi
+fi
+
 # Create application directory
 echo "📁 Setting up application directory..."
 sudo mkdir -p /opt/portfolio
@@ -86,6 +98,9 @@ echo "📥 Ensuring repository is present..."
 if [ -d "portfolio-monorepo/.git" ]; then
     echo "   Repository already cloned. Pulling latest changes..."
     git -C portfolio-monorepo pull --ff-only
+elif [ -d "$SCRIPT_ROOT/.git" ]; then
+    echo "   Copying repository from current working tree..."
+    rsync -a --delete --exclude '.git' "$SCRIPT_ROOT/" ./portfolio-monorepo/
 else
     echo "   Cloning via SSH (git@github.com:jared-scarr/portfolio-monorepo.git)"
     if ! git clone git@github.com:jared-scarr/portfolio-monorepo.git; then
