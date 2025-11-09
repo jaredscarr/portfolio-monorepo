@@ -107,7 +107,7 @@ sed -i "s/{{EMAIL}}/$EMAIL/g" Caddyfile
 
 # Start services
 echo "🚀 Starting services..."
-docker-compose up --build -d
+docker-compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up --build -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be healthy..."
