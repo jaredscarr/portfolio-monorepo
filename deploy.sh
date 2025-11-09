@@ -82,12 +82,16 @@ sudo chown $USER:$USER /opt/portfolio
 cd /opt/portfolio
 
 # Clone repository (replace with your actual repo URL)
-echo "📥 Cloning repository..."
-if [ ! -d "portfolio-monorepo" ]; then
-    if git ls-remote git@github.com:jared-scarr/portfolio-monorepo.git &> /dev/null; then
-        git clone git@github.com:jared-scarr/portfolio-monorepo.git
-    else
-        git clone https://github.com/jared-scarr/portfolio-monorepo.git
+echo "📥 Ensuring repository is present..."
+if [ -d "portfolio-monorepo/.git" ]; then
+    echo "   Repository already cloned. Pulling latest changes..."
+    git -C portfolio-monorepo pull --ff-only
+else
+    echo "   Cloning via SSH (git@github.com:jared-scarr/portfolio-monorepo.git)"
+    if ! git clone git@github.com:jared-scarr/portfolio-monorepo.git; then
+        echo "❌ Failed to clone via SSH. Make sure this instance has access to GitHub with:"
+        echo "   ssh -T git@github.com"
+        exit 1
     fi
 fi
 cd portfolio-monorepo
