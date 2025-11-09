@@ -38,10 +38,20 @@ fi
 # Install Docker
 echo "🐳 Installing Docker..."
 if ! command -v docker &> /dev/null; then
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+    if [[ "$OS" == "amzn" ]] || [[ "$OS" == "amazon" ]]; then
+        sudo dnf install -y docker
+        sudo systemctl enable docker
+        sudo systemctl start docker
+    elif [[ "$OS" == "ubuntu" ]] || [[ "$OS" == "debian" ]]; then
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+        rm get-docker.sh
+    else
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+        rm get-docker.sh
+    fi
     sudo usermod -aG docker $USER
-    rm get-docker.sh
 fi
 
 # Install git if not present (required for cloning repo)
